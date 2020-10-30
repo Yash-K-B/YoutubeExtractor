@@ -32,3 +32,7 @@ dependencies {
         VideoDetails videoDetails = extractor.extract("videoId");
 
 ```
+
+# Credits
+
+[JSoup](https://github.com/jhy/jsoup) - webpage source code download
