@@ -2,7 +2,7 @@
 Extract youtube Video and Audio download links
 
 # Add To Your Project
-```
+```gradle
 allprojects {
 		repositories {
 			...
