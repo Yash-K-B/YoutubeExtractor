@@ -46,10 +46,10 @@ public class MainActivity extends AppCompatActivity {
             String[] parts = Objects.requireNonNull(mainBinding.link.getText()).toString().contains("=") ? Objects.requireNonNull(mainBinding.link.getText()).toString().split("=") : Objects.requireNonNull(mainBinding.link.getText()).toString().split("[/]");
             String id = parts[parts.length - 1];
             final Extractor extractor = new Extractor();
-            new Thread(() -> extractor.extract(id, streamingData -> {
+            new Thread(() -> extractor.extract(id, videoDetails -> {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 runOnUiThread(() -> {
-                    MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(streamingData));
+                    MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
                     mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
                     mainBinding.container.setAdapter(adapter);
                 });
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void refresh(String url) {
-        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=n_oP9Onj0r0" : url);
+        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=F-JoqgpSsBc" : url);
         mainBinding.container.setLayoutManager(new LinearLayoutManager(this));
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }

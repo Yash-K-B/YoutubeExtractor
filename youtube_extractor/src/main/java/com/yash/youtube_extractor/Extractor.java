@@ -5,8 +5,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.yash.youtube_extractor.models.StreamingData;
+import com.yash.youtube_extractor.models.VideoData;
+import com.yash.youtube_extractor.models.VideoDetails;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +34,7 @@ public class Extractor {
     public Extractor() {
     }
 
-    public StreamingData extract(String videoId) {
+    public VideoDetails extract(String videoId) {
         String url = BASE_URL + videoId;
         boolean isCipherEnabled;
         try {
@@ -46,18 +48,21 @@ public class Extractor {
             Pattern urlEncoded = Pattern.compile("\"useCipher\":([A-za-z]+)");
             Matcher useCipherMatcher = urlEncoded.matcher(htmlPage);
             if (useCipherMatcher.find()) {
-                isCipherEnabled = useCipherMatcher.group(1).equalsIgnoreCase("true");
-                //Function name regex = =([A-za-z0-9_]+)\(decodeURIComponent\([.\w]+\)\)
-                //Function regex = Yu\s*=\s*function\(\s*a\s*\)\{\s*a=a.split\(\"\"\);([A-za-z0-9_]+).*};
-                //Axillary function = var Xu\s*=\s*{.*};
+                isCipherEnabled = Objects.requireNonNull(useCipherMatcher.group(1)).equalsIgnoreCase("true");
+                /*
+                 * Function name regex = =([A-za-z0-9_]+)\(decodeURIComponent\([.\w]+\)\)
+                 * Function regex = ([A-za-z0-9_$]{2,3})=function\(a\)\{a=a.split\(""\);([A-za-z0-9_$]+)\..*\\}
+                 * Axillary function = var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};
+                 */
+
                 if (isCipherEnabled) {
                     String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
                     Pattern pattern = Pattern.compile(jsUrlPattern);
                     Matcher matcher = pattern.matcher(htmlPage);
                     if (matcher.find()) {
                         StringBuilder functions = new StringBuilder();
-                        String playerJs = getString("https://www.youtube.com" + matcher.group(1).replace("\\/", "/"));
-                        Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\\\"\\\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
+                        String playerJs = getString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
+                        Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
                         Matcher m = decoderFunc.matcher(playerJs);
                         String auxFuncName = "";
                         if (m.find()) {
@@ -95,9 +100,11 @@ public class Extractor {
                     });
                 } else streamingData.initObject(null);
 
+                VideoData videoData = gson.fromJson(object.getString("videoDetails"),VideoData.class);
+
                 end = SystemClock.currentThreadTimeMillis();
                 Log.d("YOUTUBE_EXTRACTOR","extract : "+(end-start)/1000.0+"s");
-                return streamingData;
+                return new VideoDetails(streamingData,videoData);
             }
             return null;
 
@@ -119,8 +126,8 @@ public class Extractor {
             HttpURLConnection connection = (HttpURLConnection) webUrl.openConnection();
             connection.getDoInput();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            int numChar = -1;
-            char[] buffer = new char[4096];
+            int numChar;
+            char[] buffer = new char[131072];
             while ((numChar = bufferedReader.read(buffer)) != -1) {
                 result.append(buffer, 0, numChar);
             }
@@ -132,7 +139,7 @@ public class Extractor {
 
 
     public interface Callback {
-        void onSuccess(StreamingData streamingData);
+        void onSuccess(VideoDetails videoDetails);
     }
 }
 
