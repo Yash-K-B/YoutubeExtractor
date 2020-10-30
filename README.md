@@ -1,5 +1,5 @@
 # YoutubeExtractor
-Extract youtube video/audio download links
+Extract youtube Video and Audio download links
 
 # Add To Your Project
 ```
