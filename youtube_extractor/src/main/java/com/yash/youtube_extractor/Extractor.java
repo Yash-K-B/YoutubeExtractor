@@ -57,7 +57,7 @@ public class Extractor {
                     if (matcher.find()) {
                         StringBuilder functions = new StringBuilder();
                         String playerJs = getString("https://www.youtube.com" + matcher.group(1).replace("\\/", "/"));
-                        Pattern decoderFunc = Pattern.compile("([A-za-z0-9_]{2,3})=function\\(a\\)\\{a=a.split\\(\\\"\\\"\\);([A-za-z0-9_]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
+                        Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\\\"\\\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
                         Matcher m = decoderFunc.matcher(playerJs);
                         String auxFuncName = "";
                         if (m.find()) {
