@@ -1,0 +1,3 @@
+include ':youtube_extractor'
+include ':app'
+rootProject.name = "Youtube Extractor"
