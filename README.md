@@ -2,6 +2,7 @@
 Extract youtube video/audio download links
 
 # Add To Your Project
+```
 allprojects {
 		repositories {
 			...
@@ -11,5 +12,6 @@ allprojects {
   
   
 dependencies {
-	        implementation 'com.github.Yash-K-B:YoutubeExtractor:Tag'
+	        implementation 'com.github.Yash-K-B:YoutubeExtractor:1.0.2'
 	}
+```
