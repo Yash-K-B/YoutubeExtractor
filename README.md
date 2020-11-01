@@ -1,3 +1,5 @@
+[![Release](https://jitpack.io/v/Yash-K-B/YoutubeExtractor.svg)](https://jitpack.io/#Yash-K-B/YoutubeExtractor)
+
 # YoutubeExtractor
 Extract youtube Video and Audio download links
 
@@ -12,7 +14,7 @@ allprojects {
   
   
 dependencies {
-	        implementation 'com.github.Yash-K-B:YoutubeExtractor:1.0.2'
+	        implementation 'com.github.Yash-K-B:YoutubeExtractor:Tag'
 	}
 ```
 # How to use
