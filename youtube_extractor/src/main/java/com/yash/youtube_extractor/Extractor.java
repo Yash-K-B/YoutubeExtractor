@@ -9,6 +9,7 @@ import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
 
 import org.json.JSONObject;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.mozilla.javascript.Context;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +42,10 @@ public class Extractor {
         try {
             long start,end;
             start = SystemClock.currentThreadTimeMillis();
-            Document doc = Jsoup.connect(url).get();
+            Connection.Response response = Jsoup.connect(url)
+//                    .cookie("PHPSESSID", cookieID)
+                    .execute();
+            Document doc = Jsoup.parse(response.body());
             String decodeFunctionName = "";
             context = Context.enter();
             scope = context.initStandardObjects();
@@ -109,7 +114,8 @@ public class Extractor {
             return null;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, "extract error :"+e.getMessage()+"\n"+ Arrays.toString(e.getStackTrace()));
+
         }
         return null;
     }
