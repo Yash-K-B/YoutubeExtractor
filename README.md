@@ -1,4 +1,6 @@
 [![Release](https://jitpack.io/v/Yash-K-B/YoutubeExtractor.svg)](https://jitpack.io/#Yash-K-B/YoutubeExtractor)
+[![Generic badge](https://img.shields.io/badge/Build-passing-<COLOR>.svg)]()
+[![Generic badge](https://img.shields.io/badge/API-5.0+-<COLOR>.svg)](https://developer.android.com/about/versions/lollipop)
 
 # YoutubeExtractor
 Extract youtube Video and Audio download links
