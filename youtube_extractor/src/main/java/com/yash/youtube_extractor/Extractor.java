@@ -40,7 +40,7 @@ public class Extractor {
         String url = BASE_URL + videoId;
         boolean isCipherEnabled;
         try {
-            long start,end;
+            long start, end;
             start = SystemClock.currentThreadTimeMillis();
             String html = getString(url);
             Document doc = Jsoup.parse(html);
@@ -48,71 +48,71 @@ public class Extractor {
             context = Context.enter();
             scope = context.initStandardObjects();
             String htmlPage = doc.toString();
-            Pattern urlEncoded = Pattern.compile("\"useCipher\":([A-za-z]+)");
-            Matcher useCipherMatcher = urlEncoded.matcher(htmlPage);
-            if (useCipherMatcher.find()) {
-                isCipherEnabled = Objects.requireNonNull(useCipherMatcher.group(1)).equalsIgnoreCase("true");
-                /*
-                 * Function name regex = =([A-za-z0-9_]+)\(decodeURIComponent\([.\w]+\)\)
-                 * Function regex = ([A-za-z0-9_$]{2,3})=function\(a\)\{a=a.split\(""\);([A-za-z0-9_$]+)\..*\\}
-                 * Axillary function = var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};
-                 */
+            String script = doc.select("#player-wrap").html();
+            int stIndex = script.indexOf("\"player_response\":\"{");
+            int enIndex = script.indexOf("}\"");
+            String result = script.substring(stIndex + 19, enIndex) + "}";
+            result = result.replace("\\\\u0026", "&");
+            result = result.replace("\\\"", "\"");
+            result = result.replace("\\\\", "\\");
+            JSONObject object = new JSONObject(result);
+            Gson gson = new Gson();
+            StreamingData streamingData = gson.fromJson(object.getString("streamingData"), StreamingData.class);
 
-                if (isCipherEnabled) {
-                    String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
-                    Pattern pattern = Pattern.compile(jsUrlPattern);
-                    Matcher matcher = pattern.matcher(htmlPage);
-                    if (matcher.find()) {
-                        StringBuilder functions = new StringBuilder();
-                        String playerJs = getString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
-                        Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
-                        Matcher m = decoderFunc.matcher(playerJs);
-                        String auxFuncName = "";
-                        if (m.find()) {
-                            functions.append("var ").append(m.group(0)).append(";");
-                            decodeFunctionName = m.group(1);
-                            auxFuncName = m.group(2);
-                        }
-                        Pattern auxFunc = Pattern.compile("var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
-                        Matcher auxMatcher = auxFunc.matcher(playerJs);
-                        if (auxMatcher.find()) {
-                            functions.append(auxMatcher.group(0));
-                        }
-                        context.setOptimizationLevel(-1);
-                        context.evaluateString(scope, functions.toString(), "script", 1, null);
+            int index = result.indexOf("\"useCipher\":");
+
+            /*
+             * Function name regex = =([A-za-z0-9_]+)\(decodeURIComponent\([.\w]+\)\)
+             * Function regex = ([A-za-z0-9_$]{2,3})=function\(a\)\{a=a.split\(""\);([A-za-z0-9_$]+)\..*\\}
+             * Axillary function = var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};
+             */
+            String cipher = result.substring(index+12,index+16);
+            isCipherEnabled = cipher.equalsIgnoreCase("true");
+
+            if (isCipherEnabled) {
+                String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
+                Pattern pattern = Pattern.compile(jsUrlPattern);
+                Matcher matcher = pattern.matcher(htmlPage);
+                if (matcher.find()) {
+                    StringBuilder functions = new StringBuilder();
+                    String playerJs = getString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
+                    Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
+                    Matcher m = decoderFunc.matcher(playerJs);
+                    String auxFuncName = "";
+                    if (m.find()) {
+                        functions.append("var ").append(m.group(0)).append(";");
+                        decodeFunctionName = m.group(1);
+                        auxFuncName = m.group(2);
                     }
+                    Pattern auxFunc = Pattern.compile("var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
+                    Matcher auxMatcher = auxFunc.matcher(playerJs);
+                    if (auxMatcher.find()) {
+                        functions.append(auxMatcher.group(0));
+                    }
+                    context.setOptimizationLevel(-1);
+                    context.evaluateString(scope, functions.toString(), "script", 1, null);
                 }
-
-                String script = doc.select("#player-wrap").html();
-                int stIndex = script.indexOf("\"player_response\":\"{");
-                int enIndex = script.indexOf("}\"");
-                String result = script.substring(stIndex + 19, enIndex) + "}";
-                result = result.replace("\\\\u0026", "&");
-                result = result.replace("\\\"", "\"");
-                result = result.replace("\\\\", "\\");
-                JSONObject object = new JSONObject(result);
-                Gson gson = new Gson();
-                StreamingData streamingData = gson.fromJson(object.getString("streamingData"), StreamingData.class);
-                if(isCipherEnabled){
-                    decoderFunction = (Function) scope.get(decodeFunctionName, scope);
-                    streamingData.initObject(new StreamingData.Decoder() {
-                        @Override
-                        public String decode(String signature) {
-                            return (String) decoderFunction.call(context, scope, scope, new Object[]{signature});
-                        }
-                    });
-                } else streamingData.initObject(null);
-
-                VideoData videoData = gson.fromJson(object.getString("videoDetails"),VideoData.class);
-
-                end = SystemClock.currentThreadTimeMillis();
-                Log.d("YOUTUBE_EXTRACTOR","extract : "+(end-start)/1000.0+"s");
-                return new VideoDetails(streamingData,videoData);
             }
-            return null;
+
+
+            if (isCipherEnabled) {
+                decoderFunction = (Function) scope.get(decodeFunctionName, scope);
+                streamingData.initObject(new StreamingData.Decoder() {
+                    @Override
+                    public String decode(String signature) {
+                        return (String) decoderFunction.call(context, scope, scope, new Object[]{signature});
+                    }
+                });
+            } else streamingData.initObject(null);
+
+            VideoData videoData = gson.fromJson(object.getString("videoDetails"), VideoData.class);
+
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "extract : " + (end - start) / 1000.0 + "s");
+            return new VideoDetails(streamingData, videoData);
 
         } catch (Exception e) {
-            Log.d(TAG, "extract error :"+e.getMessage()+"\n"+ Arrays.toString(e.getStackTrace()));
+            Log.d(TAG, "extract error :" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
 
         }
         return null;
@@ -128,7 +128,7 @@ public class Extractor {
         try {
             URL webUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) webUrl.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             int numChar;
             char[] buffer = new char[131072];

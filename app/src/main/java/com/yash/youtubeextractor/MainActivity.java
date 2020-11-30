@@ -2,6 +2,7 @@ package com.yash.youtubeextractor;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yash.youtube_extractor.Extractor;
+import com.yash.youtube_extractor.models.VideoDetails;
 import com.yash.youtubeextractor.adapters.MyAdapter;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
@@ -46,16 +48,28 @@ public class MainActivity extends AppCompatActivity {
             String[] parts = Objects.requireNonNull(mainBinding.link.getText()).toString().contains("=") ? Objects.requireNonNull(mainBinding.link.getText()).toString().split("=") : Objects.requireNonNull(mainBinding.link.getText()).toString().split("[/]");
             String id = parts[parts.length - 1];
             final Extractor extractor = new Extractor();
-            new Thread(() -> extractor.extract(id, videoDetails -> {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                runOnUiThread(() -> {
-                    MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
-                    mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
-                    mainBinding.container.setAdapter(adapter);
-                });
+//            new Thread(() -> extractor.extract(id, videoDetails -> {
+//                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//                runOnUiThread(() -> {
+//                    MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
+//                    mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+//                    mainBinding.container.setAdapter(adapter);
+//                });
+//
+//                //LogHelper.d(TAG, "onCreate: "+streamingData.toString());
+//            })).start();
 
-                //LogHelper.d(TAG, "onCreate: "+streamingData.toString());
-            })).start();
+            new Thread(() -> {
+                try{
+                    VideoDetails details = extractor.extract(id);
+                    Log.d(TAG,details.getVideoData().getTitle());
+                }catch (NullPointerException e){
+                    e.printStackTrace();
+                }
+            }).start();
+
+
+
         });
 
 
@@ -63,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void refresh(String url) {
-        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=F-JoqgpSsBc" : url);
+        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=kaZFBTthNZM" : url);
         mainBinding.container.setLayoutManager(new LinearLayoutManager(this));
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
