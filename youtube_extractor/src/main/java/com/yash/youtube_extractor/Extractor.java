@@ -59,17 +59,15 @@ public class Extractor {
             Gson gson = new Gson();
             StreamingData streamingData = gson.fromJson(object.getString("streamingData"), StreamingData.class);
 
-            int index = result.indexOf("\"useCipher\":");
+            int index = result.indexOf("\"signatureCipher\"");
 
             /*
              * Function name regex = =([A-za-z0-9_]+)\(decodeURIComponent\([.\w]+\)\)
              * Function regex = ([A-za-z0-9_$]{2,3})=function\(a\)\{a=a.split\(""\);([A-za-z0-9_$]+)\..*\\}
              * Axillary function = var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};
              */
-            String cipher = result.substring(index+12,index+16);
-            isCipherEnabled = cipher.equalsIgnoreCase("true");
 
-            if (isCipherEnabled) {
+            if (index != -1) {
                 String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
                 Pattern pattern = Pattern.compile(jsUrlPattern);
                 Matcher matcher = pattern.matcher(htmlPage);
@@ -95,7 +93,7 @@ public class Extractor {
             }
 
 
-            if (isCipherEnabled) {
+            if (index != -1) {
                 decoderFunction = (Function) scope.get(decodeFunctionName, scope);
                 streamingData.initObject(new StreamingData.Decoder() {
                     @Override
