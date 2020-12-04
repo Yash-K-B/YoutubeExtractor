@@ -50,11 +50,17 @@ public class Extractor {
             String htmlPage = doc.toString();
             String script = doc.select("#player-wrap").html();
             int stIndex = script.indexOf("\"player_response\":\"{");
-            int enIndex = script.indexOf("}\"");
-            String result = script.substring(stIndex + 19, enIndex) + "}";
-            result = result.replace("\\\\u0026", "&");
-            result = result.replace("\\\"", "\"");
-            result = result.replace("\\\\", "\\");
+            String result = "";
+            if (stIndex != -1) {
+                int enIndex = script.indexOf("}\"");
+                result = script.substring(stIndex + 19, enIndex) + "}";
+                result = result.replace("\\\\u0026", "&");
+                result = result.replace("\\\"", "\"");
+                result = result.replace("\\\\", "\\");
+            } else {
+                result = extractJsonFromHtml(html);
+            }
+
             JSONObject object = new JSONObject(result);
             Gson gson = new Gson();
             StreamingData streamingData = gson.fromJson(object.getString("streamingData"), StreamingData.class);
@@ -138,6 +144,11 @@ public class Extractor {
         }
         return result.toString();
     }
+    static {
+        System.loadLibrary("native_extractor");
+    }
+
+    public native String extractJsonFromHtml(String html);
 
 
     public interface Callback {
