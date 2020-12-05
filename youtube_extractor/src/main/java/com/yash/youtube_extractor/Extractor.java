@@ -9,9 +9,6 @@ import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
 
 import org.json.JSONObject;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptableObject;
@@ -38,22 +35,18 @@ public class Extractor {
 
     public VideoDetails extract(String videoId) {
         String url = BASE_URL + videoId;
-        boolean isCipherEnabled;
         try {
             long start, end;
             start = SystemClock.currentThreadTimeMillis();
             String html = getString(url);
-            Document doc = Jsoup.parse(html);
             String decodeFunctionName = "";
             context = Context.enter();
             scope = context.initStandardObjects();
-            String htmlPage = doc.toString();
-            String script = doc.select("#player-wrap").html();
-            int stIndex = script.indexOf("\"player_response\":\"{");
+            int stIndex = html.indexOf("\"player_response\":\"{");
             String result = "";
             if (stIndex != -1) {
-                int enIndex = script.indexOf("}\"");
-                result = script.substring(stIndex + 19, enIndex) + "}";
+                int enIndex = html.indexOf("}\"",stIndex);
+                result = html.substring(stIndex + 19, enIndex) + "}";
                 result = result.replace("\\\\u0026", "&");
                 result = result.replace("\\\"", "\"");
                 result = result.replace("\\\\", "\\");
@@ -76,7 +69,7 @@ public class Extractor {
             if (index != -1) {
                 String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
                 Pattern pattern = Pattern.compile(jsUrlPattern);
-                Matcher matcher = pattern.matcher(htmlPage);
+                Matcher matcher = pattern.matcher(html);
                 if (matcher.find()) {
                     StringBuilder functions = new StringBuilder();
                     String playerJs = getString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
@@ -133,6 +126,7 @@ public class Extractor {
             URL webUrl = new URL(url);
             HttpURLConnection connection = (HttpURLConnection) webUrl.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36");
+            //connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15");
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             int numChar;
             char[] buffer = new char[131072];
@@ -144,11 +138,26 @@ public class Extractor {
         }
         return result.toString();
     }
-    static {
-        System.loadLibrary("native_extractor");
-    }
 
-    public native String extractJsonFromHtml(String html);
+    public String extractJsonFromHtml(String html){
+        int stIndex = html.indexOf("\"responseContext\":{");
+        StringBuilder builder = new StringBuilder();
+        char ch;
+        int counter = 0;
+        for(int st = stIndex-1;st<html.length();st++){
+            ch = html.charAt(st);
+            builder.append(ch);
+            if(ch == '{'){
+                counter++;
+                continue;
+            }
+            if (ch=='}'){
+                counter--;
+                if(counter == 0) break;
+            }
+        }
+        return builder.toString();
+    }
 
 
     public interface Callback {

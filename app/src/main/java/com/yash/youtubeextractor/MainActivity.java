@@ -7,13 +7,11 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yash.youtube_extractor.Extractor;
 import com.yash.youtube_extractor.models.VideoDetails;
-import com.yash.youtubeextractor.adapters.MyAdapter;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
 import java.util.Objects;
