@@ -37,6 +37,14 @@ dependencies {
 
 ```
 
+# Response Object
+
+![](https://github.com/Yash-K-B/YoutubeExtractor/blob/master/screenshots/Screenshot2.jpg?raw=true)
+![](https://github.com/Yash-K-B/YoutubeExtractor/blob/master/screenshots/Screenshot1.png?raw=true)
+![](https://github.com/Yash-K-B/YoutubeExtractor/blob/master/screenshots/Screenshot3.png?raw=true)
+![](https://github.com/Yash-K-B/YoutubeExtractor/blob/master/screenshots/Screenshot4.png?raw=true)
+![](https://github.com/Yash-K-B/YoutubeExtractor/blob/master/screenshots/Screenshot5.png?raw=true)
+
 # Credits
 
 [JSoup](https://github.com/jhy/jsoup) - webpage source code download
