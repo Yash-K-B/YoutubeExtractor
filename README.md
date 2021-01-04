@@ -16,7 +16,7 @@ allprojects {
   
   
 dependencies {
-	        implementation 'com.github.Yash-K-B:YoutubeExtractor:Tag'
+	        implementation 'com.github.yash-k-b:youtubeextractor:Tag'
 	}
 ```
 # How to use
@@ -24,16 +24,25 @@ dependencies {
 ```java
 1. Using callback
 	Extractor extractor = new Extractor();
-        extractor.extract("videoId", new Extractor.Callback() {
-            @Override
-            public void onSuccess(VideoDetails videoDetails) {
-                ...
-            }
-        });
+	extractor.extract("videoId", new Extractor.Callback() {
+	    @Override
+	    public void onSuccess(VideoDetails videoDetails) {
+		...
+	    }
+
+	    @Override
+	    public void onError(ExtractionException e) {
+		...
+	    }
+	});
 
 2. Inline return
 	Extractor extractor = new Extractor();
-        VideoDetails videoDetails = extractor.extract("videoId");
+	try {
+	    VideoDetails details = extractor.extract("videoId");
+	}catch (ExtractionException e){
+	    e.printStackTrace();
+	}
 
 ```
 
