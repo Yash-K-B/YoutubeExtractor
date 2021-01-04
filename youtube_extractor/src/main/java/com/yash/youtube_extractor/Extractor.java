@@ -4,6 +4,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.StreamingData;
 import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
@@ -33,7 +34,7 @@ public class Extractor {
     public Extractor() {
     }
 
-    public VideoDetails extract(String videoId) {
+    public VideoDetails extract(String videoId) throws ExtractionException {
         String url = BASE_URL + videoId;
         try {
             long start, end;
@@ -109,14 +110,16 @@ public class Extractor {
             return new VideoDetails(streamingData, videoData);
 
         } catch (Exception e) {
-            Log.d(TAG, "extract error :" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
-
+            throw new ExtractionException(e.getMessage());
         }
-        return null;
     }
 
     public void extract(String videoId, Callback callback) {
-        callback.onSuccess(extract(videoId));
+        try {
+            callback.onSuccess(extract(videoId));
+        } catch (ExtractionException e) {
+            callback.onError(e);
+        }
     }
 
 
@@ -162,6 +165,7 @@ public class Extractor {
 
     public interface Callback {
         void onSuccess(VideoDetails videoDetails);
+        void onError(ExtractionException e);
     }
 }
 

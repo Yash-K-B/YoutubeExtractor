@@ -2,16 +2,21 @@ package com.yash.youtubeextractor;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yash.youtube_extractor.Extractor;
+import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.VideoDetails;
+import com.yash.youtubeextractor.adapters.MyAdapter;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
 import java.util.Objects;
@@ -20,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     ActivityMainBinding mainBinding;
     BottomSheetBehavior bottomSheetBehavior;
+    Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,33 +52,50 @@ public class MainActivity extends AppCompatActivity {
             String[] parts = Objects.requireNonNull(mainBinding.link.getText()).toString().contains("=") ? Objects.requireNonNull(mainBinding.link.getText()).toString().split("=") : Objects.requireNonNull(mainBinding.link.getText()).toString().split("[/]");
             String id = parts[parts.length - 1];
             final Extractor extractor = new Extractor();
-//            new Thread(() -> extractor.extract(id, videoDetails -> {
-//                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-//                runOnUiThread(() -> {
-//                    MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
-//                    mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
-//                    mainBinding.container.setAdapter(adapter);
-//                });
-//
-//                //LogHelper.d(TAG, "onCreate: "+streamingData.toString());
-//            })).start();
-
             new Thread(() -> {
-                try{
-                    VideoDetails details = extractor.extract(id);
-                    Log.d(TAG,details.getVideoData().getTitle());
-                }catch (NullPointerException e){
+                try {
+                    extractor.extract(id, new Extractor.Callback() {
+                        @Override
+                        public void onSuccess(VideoDetails videoDetails) {
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            runOnUiThread(() -> {
+                                MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
+                                mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+                                mainBinding.container.setAdapter(adapter);
+                            });
+                        }
+
+                        @Override
+                        public void onError(ExtractionException e) {
+
+                        }
+                    });
+                } catch (ExtractionException e) {
                     e.printStackTrace();
                 }
             }).start();
 
+            //LogHelper.d(TAG, "onCreate: "+streamingData.toString());
+
+//            new Thread(() -> {
+//               try {
+//                   VideoDetails details = extractor.extract(id);
+//                   Log.d(TAG,details.getVideoData().getTitle());
+//                   handler.post(()->Toast.makeText(MainActivity.this, "Extraction Successful", Toast.LENGTH_SHORT).show());
+//               }
+//               catch (ExtractionException e){
+//                   e.printStackTrace();
+//               }
+//
+//
+//            }).start();
 
 
-        });
+    });
 
 
-        //text.setText(extractor.extract("_bcnhtesizI"));
-    }
+    //text.setText(extractor.extract("_bcnhtesizI"));
+}
 
     void refresh(String url) {
         mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=kaZFBTthNZM" : url);

@@ -64,7 +64,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     if (m.find())
                         binding.type.setText(Objects.requireNonNull(m.group(1)).toUpperCase());
                     binding.head1.setText(ConverterUtil.getBitrate(myData.getMuxedStreams().get(position).getBitrate()));
-                    binding.head2.setText(ConverterUtil.getFrameRate(myData.getMuxedStreams().get(position).getFps()));
+                    binding.head2.setText(myData.getMuxedStreams().get(position).getQualityLabel());
                     binding.subText.setText(m.group(3));
                     binding.fileSize.setText(ConverterUtil.convertToHighest(myData.getMuxedStreams().get(position).getContentLength()));
                     itemView.setOnClickListener(v -> {
@@ -94,7 +94,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     if (m.find())
                         binding.type.setText(Objects.requireNonNull(m.group(1)).toUpperCase());
                     binding.head1.setText(ConverterUtil.getBitrate(myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getBitrate()));
-                    binding.head2.setText(ConverterUtil.getFrameRate(myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getFps()));
+                    binding.head2.setText(myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getQualityLabel());
                     binding.subText.setText(m.group(3));
                     binding.fileSize.setText(ConverterUtil.convertToHighest(myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getContentLength()));
                     itemView.setOnClickListener(v -> {
