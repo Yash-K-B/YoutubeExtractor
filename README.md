@@ -39,7 +39,7 @@ dependencies {
 2. Inline return
 	Extractor extractor = new Extractor();
 	try {
-	    VideoDetails details = extractor.extract("videoId");
+	    VideoDetails details = extractor.extract("videoId");  //This may produce NetworkOnMainThreadException
 	}catch (ExtractionException e){
 	    e.printStackTrace();
 	}
