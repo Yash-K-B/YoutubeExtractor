@@ -1,5 +1,6 @@
 package com.yash.youtube_extractor;
 
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -21,6 +22,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,8 +34,10 @@ public class Extractor {
     Context context;
     ScriptableObject scope;
     Function decoderFunction;
+    Handler handler;
 
     public Extractor() {
+        handler = new Handler();
     }
 
     public VideoDetails extract(String videoId) throws ExtractionException {
@@ -46,7 +52,7 @@ public class Extractor {
             int stIndex = html.indexOf("\"player_response\":\"{");
             String result = "";
             if (stIndex != -1) {
-                int enIndex = html.indexOf("}\"",stIndex);
+                int enIndex = html.indexOf("}\"", stIndex);
                 result = html.substring(stIndex + 19, enIndex) + "}";
                 result = result.replace("\\\\u0026", "&");
                 result = result.replace("\\\"", "\"");
@@ -110,16 +116,21 @@ public class Extractor {
             return new VideoDetails(streamingData, videoData);
 
         } catch (Exception e) {
-            throw new ExtractionException(e.getMessage());
+            throw new ExtractionException(e.toString());
         }
     }
 
     public void extract(String videoId, Callback callback) {
-        try {
-            callback.onSuccess(extract(videoId));
-        } catch (ExtractionException e) {
-            callback.onError(e);
-        }
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                VideoDetails videoDetails = extract(videoId);
+                handler.post(() -> callback.onSuccess(videoDetails));
+
+            } catch (ExtractionException e) {
+                handler.post(() -> callback.onError(e));
+            }
+        });
+
     }
 
 
@@ -142,21 +153,21 @@ public class Extractor {
         return result.toString();
     }
 
-    public String extractJsonFromHtml(String html){
+    public String extractJsonFromHtml(String html) {
         int stIndex = html.indexOf("\"responseContext\":{");
         StringBuilder builder = new StringBuilder();
         char ch;
         int counter = 0;
-        for(int st = stIndex-1;st<html.length();st++){
+        for (int st = stIndex - 1; st < html.length(); st++) {
             ch = html.charAt(st);
             builder.append(ch);
-            if(ch == '{'){
+            if (ch == '{') {
                 counter++;
                 continue;
             }
-            if (ch=='}'){
+            if (ch == '}') {
                 counter--;
-                if(counter == 0) break;
+                if (counter == 0) break;
             }
         }
         return builder.toString();
@@ -165,6 +176,7 @@ public class Extractor {
 
     public interface Callback {
         void onSuccess(VideoDetails videoDetails);
+
         void onError(ExtractionException e);
     }
 }

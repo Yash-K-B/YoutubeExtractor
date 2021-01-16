@@ -13,10 +13,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.yash.logging.LogHelper;
 import com.yash.youtube_extractor.Extractor;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.VideoDetails;
 import com.yash.youtubeextractor.adapters.MyAdapter;
+import com.yash.youtubeextractor.databinding.ActivityKotlinTestBinding;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
 import java.util.Objects;
@@ -52,28 +54,25 @@ public class MainActivity extends AppCompatActivity {
             String[] parts = Objects.requireNonNull(mainBinding.link.getText()).toString().contains("=") ? Objects.requireNonNull(mainBinding.link.getText()).toString().split("=") : Objects.requireNonNull(mainBinding.link.getText()).toString().split("[/]");
             String id = parts[parts.length - 1];
             final Extractor extractor = new Extractor();
-            new Thread(() -> {
-                try {
-                    extractor.extract(id, new Extractor.Callback() {
-                        @Override
-                        public void onSuccess(VideoDetails videoDetails) {
-                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                            runOnUiThread(() -> {
-                                MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
-                                mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
-                                mainBinding.container.setAdapter(adapter);
-                            });
-                        }
+            try {
+                extractor.extract(id, new Extractor.Callback() {
+                    @Override
+                    public void onSuccess(VideoDetails videoDetails) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
+                        mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+                        mainBinding.container.setAdapter(adapter);
+                    }
 
-                        @Override
-                        public void onError(ExtractionException e) {
+                    @Override
+                    public void onError(ExtractionException e) {
+                        LogHelper.d(TAG, "onError: "+ e.getLocalizedMessage());
+                    }
+                });
+            } catch (ExtractionException e) {
+                e.printStackTrace();
+            }
 
-                        }
-                    });
-                } catch (ExtractionException e) {
-                    e.printStackTrace();
-                }
-            }).start();
 
             //LogHelper.d(TAG, "onCreate: "+streamingData.toString());
 
@@ -91,11 +90,18 @@ public class MainActivity extends AppCompatActivity {
 //            }).start();
 
 
-    });
+        });
+        mainBinding.testKotlin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, KotlinTestActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
-    //text.setText(extractor.extract("_bcnhtesizI"));
-}
+        //text.setText(extractor.extract("_bcnhtesizI"));
+    }
 
     void refresh(String url) {
         mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=kaZFBTthNZM" : url);
