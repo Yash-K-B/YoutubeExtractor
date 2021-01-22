@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.yash.logging.LogHelper
 import com.yash.youtube_extractor.Extractor
 import com.yash.youtube_extractor.exceptions.ExtractionException
 import com.yash.youtube_extractor.models.VideoDetails
@@ -19,20 +20,22 @@ class KotlinTestActivity : AppCompatActivity() {
 
         kotlinTestBinding.testKotlin.setOnClickListener(View.OnClickListener {
 
-                val extractor = Extractor();
-                extractor.extract("GYGIVAb5s4U", object : Extractor.Callback {
-                    override fun onSuccess(videoDetails: VideoDetails?) {
-                        val videoUrl = videoDetails?.videoData?.thumbnail?.thumbnails?.get(0)?.url
-                        Log.d("LOG_DEBUG", "Url: $videoUrl")
-                        Toast.makeText(this@KotlinTestActivity,"Success",Toast.LENGTH_SHORT).show()
-                    }
+            val extractor = Extractor();
+            extractor.extract("GYGIVAb5s4U", object : Extractor.Callback {
+                override fun onSuccess(videoDetails: VideoDetails?) {
+                    val videoUrl = videoDetails?.videoData?.thumbnail?.thumbnails?.get(0)?.url
+                    Log.d("LOG_DEBUG", "Url: $videoUrl")
+                    val channelThumbnailUrl = videoDetails?.videoData?.channelThumbnail?.thumbnails?.get(0)?.url
+                    LogHelper.d("From Kotlin ", " channel Thumbnail : $channelThumbnailUrl")
+                    Toast.makeText(this@KotlinTestActivity, "Success", Toast.LENGTH_SHORT).show()
+                }
 
-                    override fun onError(e: ExtractionException?) {
-                        //here e is null
-                        Log.d("LOG_DEBUG", "Error: " + e?.localizedMessage)
-                        Toast.makeText(this@KotlinTestActivity,"Failed",Toast.LENGTH_SHORT).show()
-                    }
-                })
+                override fun onError(e: ExtractionException) {
+                    //here e is null
+                    Log.d("LOG_DEBUG", "Error: " + e.localizedMessage)
+                    Toast.makeText(this@KotlinTestActivity, "Failed", Toast.LENGTH_SHORT).show()
+                }
+            })
 
 //            try {
 //                var videoDetails = extractor.extract("GYGIVAb5s4U")
@@ -40,8 +43,6 @@ class KotlinTestActivity : AppCompatActivity() {
 //            catch (e: ExtractionException){
 //                Log.d("LOG_DEBUG", "Error: " + e.localizedMessage)
 //            }
-
-
 
 
         })

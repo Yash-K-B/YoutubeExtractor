@@ -55,6 +55,16 @@ public class VideoData {
     @Expose
     private Boolean isLiveContent;
 
+    private ChannelThumbnail channelThumbnail;
+
+    public ChannelThumbnail getChannelThumbnail() {
+        return channelThumbnail;
+    }
+
+    public void setChannelThumbnail(ChannelThumbnail channelThumbnail) {
+        this.channelThumbnail = channelThumbnail;
+    }
+
     public String getVideoId() {
         return videoId;
     }

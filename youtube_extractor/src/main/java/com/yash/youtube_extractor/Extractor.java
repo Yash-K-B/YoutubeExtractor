@@ -5,7 +5,9 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
+import com.yash.youtube_extractor.models.ChannelThumbnail;
 import com.yash.youtube_extractor.models.StreamingData;
 import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
@@ -61,8 +63,14 @@ public class Extractor {
                 result = extractJsonFromHtml(html);
             }
 
-            JSONObject object = new JSONObject(result);
             Gson gson = new Gson();
+
+            /* EXTRACTING Channel Thumbnails */
+            String channelThumbnailJson = extractJsonFromHtml("\"channelThumbnail\":{", html);
+            ChannelThumbnail channelThumbnail = gson.fromJson(channelThumbnailJson, ChannelThumbnail.class);
+
+
+            JSONObject object = new JSONObject(result);
             StreamingData streamingData = gson.fromJson(object.getString("streamingData"), StreamingData.class);
 
             int index = result.indexOf("\"signatureCipher\"");
@@ -110,6 +118,7 @@ public class Extractor {
             } else streamingData.initObject(null);
 
             VideoData videoData = gson.fromJson(object.getString("videoDetails"), VideoData.class);
+            videoData.setChannelThumbnail(channelThumbnail);
 
             end = SystemClock.currentThreadTimeMillis();
             Log.d("YOUTUBE_EXTRACTOR", "extract : " + (end - start) / 1000.0 + "s");
@@ -159,6 +168,27 @@ public class Extractor {
         char ch;
         int counter = 0;
         for (int st = stIndex - 1; st < html.length(); st++) {
+            ch = html.charAt(st);
+            builder.append(ch);
+            if (ch == '{') {
+                counter++;
+                continue;
+            }
+            if (ch == '}') {
+                counter--;
+                if (counter == 0) break;
+            }
+        }
+        return builder.toString();
+    }
+
+    public String extractJsonFromHtml(String initial, String html) {
+        int stIndex = html.indexOf(initial);
+        StringBuilder builder = new StringBuilder();
+        if (stIndex == -1) return builder.toString();
+        char ch;
+        int counter = 0;
+        for (int st = stIndex + initial.length() - 1; st < html.length(); st++) {
             ch = html.charAt(st);
             builder.append(ch);
             if (ch == '{') {
