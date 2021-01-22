@@ -193,6 +193,28 @@ public class VideoData {
         this.isLiveContent = isLiveContent;
     }
 
+    @Override
+    public String toString() {
+        return "VideoData{" +
+                "\nvideoId='" + videoId + '\'' +
+                ", \ntitle='" + title + '\'' +
+                ", \nlengthSeconds='" + lengthSeconds + '\'' +
+                ", \nkeywords=" + keywords +
+                ", \nchannelId='" + channelId + '\'' +
+                ", \nisOwnerViewing=" + isOwnerViewing +
+                ", \nshortDescription='" + shortDescription + '\'' +
+                ", \nisCrawlable=" + isCrawlable +
+                ", \nthumbnail=" + thumbnail +
+                ", \naverageRating=" + averageRating +
+                ", \nallowRatings=" + allowRatings +
+                ", \nviewCount='" + viewCount + '\'' +
+                ", \nauthor='" + author + '\'' +
+                ", \nisPrivate=" + isPrivate +
+                ", \nisUnpluggedCorpus=" + isUnpluggedCorpus +
+                ", \nisLiveContent=" + isLiveContent +
+                ", \nchannelThumbnail=" + channelThumbnail +
+                "\n}";
+    }
 
     public static class Thumbnail {
 

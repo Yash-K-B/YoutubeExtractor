@@ -15,10 +15,26 @@ public class ChannelThumbnail implements Serializable {
         this.thumbnails = thumbnails;
     }
 
+    @Override
+    public String toString() {
+        return "ChannelThumbnail{" +
+                "thumbnails=" + thumbnails +
+                '}';
+    }
+
     public static class Thumbnail{
         public String url;
         public int width;
         public int height;
+
+        @Override
+        public String toString() {
+            return "Thumbnail{" +
+                    "url='" + url + '\'' +
+                    ", width=" + width +
+                    ", height=" + height +
+                    '}';
+        }
 
         public String getUrl() {
             return url;
