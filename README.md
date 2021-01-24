@@ -16,7 +16,7 @@ allprojects {
   
   
 dependencies {
-	        implementation 'com.github.yash-k-b:youtubeextractor:Tag'
+	        implementation 'com.github.Yash-K-B:youtubeextractor:Tag'
 	}
 ```
 # How to use
