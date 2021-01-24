@@ -1,11 +1,11 @@
 package com.yash.youtube_extractor;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.ChannelThumbnail;
 import com.yash.youtube_extractor.models.StreamingData;
@@ -22,11 +22,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +36,7 @@ public class Extractor {
     Handler handler;
 
     public Extractor() {
-        handler = new Handler();
+        handler = new Handler(Looper.getMainLooper());
     }
 
     public VideoDetails extract(String videoId) throws ExtractionException {
