@@ -22,7 +22,7 @@ dependencies {
 # How to use
 
 ```java
-1. Using callback
+1. Asynchronous
 	Extractor extractor = new Extractor();
 	extractor.extract("videoId", new Extractor.Callback() {
 	    @Override
@@ -36,7 +36,7 @@ dependencies {
 	    }
 	});
 
-2. Inline return
+2. Synchronous
 	Extractor extractor = new Extractor();
 	try {
 	    VideoDetails details = extractor.extract("videoId");  //This may produce 
