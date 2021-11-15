@@ -3,6 +3,7 @@ package com.yash.youtubeextractor;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.service.autofill.FieldClassification;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +23,8 @@ import com.yash.youtubeextractor.databinding.ActivityKotlinTestBinding;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -42,12 +45,7 @@ public class MainActivity extends AppCompatActivity {
         String url = extras == null ? null : extras.getString(Intent.EXTRA_TEXT);
         refresh(url);
 
-        mainBinding.heading.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bottomSheetBehavior.setState(bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED ? BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_EXPANDED);
-            }
-        });
+        mainBinding.heading.setOnClickListener(v -> bottomSheetBehavior.setState(bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED ? BottomSheetBehavior.STATE_COLLAPSED : BottomSheetBehavior.STATE_EXPANDED));
 
         Button search = findViewById(R.id.search);
         search.setOnClickListener(v -> {
@@ -67,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onError(ExtractionException e) {
                         LogHelper.d(TAG, "onError: "+ e.getLocalizedMessage());
+                        Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
             } catch (ExtractionException e) {
@@ -91,12 +90,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         });
-        mainBinding.testKotlin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, KotlinTestActivity.class);
-                startActivity(intent);
-            }
+        mainBinding.testKotlin.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, KotlinTestActivity.class);
+            startActivity(intent);
         });
 
 
@@ -114,6 +110,21 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         Bundle extras = intent.getExtras();
         String url = extras == null ? null : extras.getString(Intent.EXTRA_TEXT);
-        refresh(url);
+        refresh(extractVideoIdAndSet(url));
+    }
+
+    private static String extractVideoIdAndSet(String raw) {
+        String outPattern = "https://www.youtube.com/watch?v=%s";
+        String id = null;
+        Pattern pattern = Pattern.compile("https?://(www.)?youtube.com/shorts/([A-Za-z0-9]+)\\??.*");
+        Matcher matcher = pattern.matcher(raw);
+        LogHelper.d(TAG, "extractVideoIdAndSet: "+ raw);
+        if(matcher.find()){
+            id = matcher.group(2);
+            LogHelper.d(TAG, "extractVideoIdAndSet: "+id);
+        }
+        if(id != null)
+            return String.format(outPattern, id);
+        return raw;
     }
 }

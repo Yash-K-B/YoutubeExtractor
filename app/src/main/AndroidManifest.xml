@@ -12,10 +12,12 @@
         android:supportsRtl="true"
         android:name=".YoutubeExtractor"
         android:theme="@style/AppTheme">
-        <activity android:name=".KotlinTestActivity"></activity>
+        <activity android:name=".KotlinTestActivity"
+            android:exported="true"/>
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
