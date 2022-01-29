@@ -1,0 +1,10 @@
+package com.yash.youtubeextractor.pojo.search;
+
+import lombok.Data;
+
+@Data
+public class ThumbnailOverlaysItem{
+	private ThumbnailOverlayNowPlayingRenderer thumbnailOverlayNowPlayingRenderer;
+	private ThumbnailOverlayToggleButtonRenderer thumbnailOverlayToggleButtonRenderer;
+	private ThumbnailOverlayTimeStatusRenderer thumbnailOverlayTimeStatusRenderer;
+}

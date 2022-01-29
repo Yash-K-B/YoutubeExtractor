@@ -11,6 +11,8 @@ import com.yash.youtube_extractor.models.ChannelThumbnail;
 import com.yash.youtube_extractor.models.StreamingData;
 import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
+import com.yash.youtube_extractor.utility.CommonUtility;
+import com.yash.youtube_extractor.utility.JsonUtil;
 
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
@@ -44,7 +46,7 @@ public class Extractor {
         try {
             long start, end;
             start = SystemClock.currentThreadTimeMillis();
-            String html = getString(url);
+            String html = CommonUtility.getHtmlString(url);
             String decodeFunctionName = "";
             context = Context.enter();
             scope = context.initStandardObjects();
@@ -63,7 +65,7 @@ public class Extractor {
             Gson gson = new Gson();
 
             /* EXTRACTING Channel Thumbnails */
-            String channelThumbnailJson = extractJsonFromHtml("\"channelThumbnail\":{", html);
+            String channelThumbnailJson = JsonUtil.extractJsonFromHtml("\"channelThumbnail\":{", html);
             ChannelThumbnail channelThumbnail = gson.fromJson(channelThumbnailJson, ChannelThumbnail.class);
 
 
@@ -84,7 +86,7 @@ public class Extractor {
                 Matcher matcher = pattern.matcher(html);
                 if (matcher.find()) {
                     StringBuilder functions = new StringBuilder();
-                    String playerJs = getString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
+                    String playerJs = CommonUtility.getHtmlString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
                     Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
                     Matcher m = decoderFunc.matcher(playerJs);
                     String auxFuncName = "";
@@ -140,25 +142,6 @@ public class Extractor {
     }
 
 
-    String getString(String url) {
-        StringBuilder result = new StringBuilder();
-        try {
-            URL webUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) webUrl.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36");
-            //connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15");
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            int numChar;
-            char[] buffer = new char[131072];
-            while ((numChar = bufferedReader.read(buffer)) != -1) {
-                result.append(buffer, 0, numChar);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result.toString();
-    }
-
     public String extractJsonFromHtml(String html) {
         int stIndex = html.indexOf("\"responseContext\":{");
         StringBuilder builder = new StringBuilder();
@@ -179,26 +162,6 @@ public class Extractor {
         return builder.toString();
     }
 
-    public String extractJsonFromHtml(String initial, String html) {
-        int stIndex = html.indexOf(initial);
-        StringBuilder builder = new StringBuilder();
-        if (stIndex == -1) return builder.toString();
-        char ch;
-        int counter = 0;
-        for (int st = stIndex + initial.length() - 1; st < html.length(); st++) {
-            ch = html.charAt(st);
-            builder.append(ch);
-            if (ch == '{') {
-                counter++;
-                continue;
-            }
-            if (ch == '}') {
-                counter--;
-                if (counter == 0) break;
-            }
-        }
-        return builder.toString();
-    }
 
 
     public interface Callback {
