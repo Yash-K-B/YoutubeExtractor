@@ -95,7 +95,7 @@ public class Extractor {
                         decodeFunctionName = m.group(1);
                         auxFuncName = m.group(2);
                     }
-                    Pattern auxFunc = Pattern.compile("var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
+                    Pattern auxFunc = Pattern.compile("var " + (auxFuncName != null ? auxFuncName.replace("$", "\\$") : "") + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
                     Matcher auxMatcher = auxFunc.matcher(playerJs);
                     if (auxMatcher.find()) {
                         functions.append(auxMatcher.group(0));
