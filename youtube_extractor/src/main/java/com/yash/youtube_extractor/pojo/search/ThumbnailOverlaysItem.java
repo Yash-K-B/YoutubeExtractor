@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ThumbnailOverlaysItem{
 
-	@SerializedName("thumbnailOverlayNowPlayingRenderer")
+	@Json(name="thumbnailOverlayNowPlayingRenderer")
 	private ThumbnailOverlayNowPlayingRenderer thumbnailOverlayNowPlayingRenderer;
 
-	@SerializedName("thumbnailOverlayToggleButtonRenderer")
+	@Json(name="thumbnailOverlayToggleButtonRenderer")
 	private ThumbnailOverlayToggleButtonRenderer thumbnailOverlayToggleButtonRenderer;
 
-	@SerializedName("thumbnailOverlayTimeStatusRenderer")
+	@Json(name="thumbnailOverlayTimeStatusRenderer")
 	private ThumbnailOverlayTimeStatusRenderer thumbnailOverlayTimeStatusRenderer;
 
 	public void setThumbnailOverlayNowPlayingRenderer(ThumbnailOverlayNowPlayingRenderer thumbnailOverlayNowPlayingRenderer){

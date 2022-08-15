@@ -1,68 +1,70 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
+import com.yash.youtube_extractor.pojo.common.LengthText;
+import com.yash.youtube_extractor.pojo.common.Thumbnail;
 
 public class VideoRenderer{
 
-	@SerializedName("lengthText")
+	@Json(name="lengthText")
 	private LengthText lengthText;
 
-	@SerializedName("thumbnail")
+	@Json(name="thumbnail")
 	private Thumbnail thumbnail;
 
-	@SerializedName("detailedMetadataSnippets")
+	@Json(name="detailedMetadataSnippets")
 	private List<DetailedMetadataSnippetsItem> detailedMetadataSnippets;
 
-	@SerializedName("videoId")
+	@Json(name="videoId")
 	private String videoId;
 
-	@SerializedName("title")
+	@Json(name="title")
 	private Title title;
 
-	@SerializedName("shortBylineText")
+	@Json(name="shortBylineText")
 	private ShortBylineText shortBylineText;
 
-	@SerializedName("menu")
+	@Json(name="menu")
 	private Menu menu;
 
-	@SerializedName("thumbnailOverlays")
+	@Json(name="thumbnailOverlays")
 	private List<ThumbnailOverlaysItem> thumbnailOverlays;
 
-	@SerializedName("ownerText")
+	@Json(name="ownerText")
 	private OwnerText ownerText;
 
-	@SerializedName("richThumbnail")
+	@Json(name="richThumbnail")
 	private RichThumbnail richThumbnail;
 
-	@SerializedName("longBylineText")
+	@Json(name="longBylineText")
 	private LongBylineText longBylineText;
 
-	@SerializedName("trackingParams")
+	@Json(name="trackingParams")
 	private String trackingParams;
 
-	@SerializedName("showActionMenu")
+	@Json(name="showActionMenu")
 	private Boolean showActionMenu;
 
-	@SerializedName("publishedTimeText")
+	@Json(name="publishedTimeText")
 	private PublishedTimeText publishedTimeText;
 
-	@SerializedName("viewCountText")
+	@Json(name="viewCountText")
 	private ViewCountText viewCountText;
 
-	@SerializedName("shortViewCountText")
+	@Json(name="shortViewCountText")
 	private ShortViewCountText shortViewCountText;
 
-	@SerializedName("channelThumbnailSupportedRenderers")
+	@Json(name="channelThumbnailSupportedRenderers")
 	private ChannelThumbnailSupportedRenderers channelThumbnailSupportedRenderers;
 
-	@SerializedName("navigationEndpoint")
+	@Json(name="navigationEndpoint")
 	private NavigationEndpoint navigationEndpoint;
 
-	@SerializedName("ownerBadges")
+	@Json(name="ownerBadges")
 	private List<OwnerBadgesItem> ownerBadges;
 
-	@SerializedName("badges")
+	@Json(name="badges")
 	private List<BadgesItem> badges;
 
 	public void setLengthText(LengthText lengthText){

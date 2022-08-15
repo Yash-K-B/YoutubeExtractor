@@ -1,7 +1,7 @@
 package com.yash.youtube_extractor.models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+
+import com.squareup.moshi.Json;
 import com.yash.youtube_extractor.models.StreamingData.ColorInfo;
 import com.yash.youtube_extractor.models.StreamingData.IndexRange;
 import com.yash.youtube_extractor.models.StreamingData.InitRange;
@@ -9,74 +9,74 @@ import com.yash.youtube_extractor.models.StreamingData.InitRange;
 public class AdaptiveFormat {
     private static final String TAG = "AdaptiveFormat";
 
-    @SerializedName("itag")
-    @Expose
+    @Json(name="itag")
+    
     private Integer itag;
-    @SerializedName("mimeType")
-    @Expose
+    @Json(name="mimeType")
+    
     private String mimeType;
-    @SerializedName("bitrate")
-    @Expose
+    @Json(name="bitrate")
+    
     private Integer bitrate;
-    @SerializedName("width")
-    @Expose
+    @Json(name="width")
+    
     private Integer width;
-    @SerializedName("height")
-    @Expose
+    @Json(name="height")
+    
     private Integer height;
-    @SerializedName("initRange")
-    @Expose
+    @Json(name="initRange")
+    
     private InitRange initRange;
-    @SerializedName("indexRange")
-    @Expose
+    @Json(name="indexRange")
+    
     private IndexRange indexRange;
-    @SerializedName("lastModified")
-    @Expose
+    @Json(name="lastModified")
+    
     private String lastModified;
-    @SerializedName("contentLength")
-    @Expose
+    @Json(name="contentLength")
+    
     private long contentLength;
-    @SerializedName("quality")
-    @Expose
+    @Json(name="quality")
+    
     private String quality;
-    @SerializedName("fps")
-    @Expose
+    @Json(name="fps")
+    
     private Integer fps;
-    @SerializedName("qualityLabel")
-    @Expose
+    @Json(name="qualityLabel")
+    
     private String qualityLabel;
-    @SerializedName("projectionType")
-    @Expose
+    @Json(name="projectionType")
+    
     private String projectionType;
-    @SerializedName("averageBitrate")
-    @Expose
+    @Json(name="averageBitrate")
+    
     private Integer averageBitrate;
-    @SerializedName("approxDurationMs")
-    @Expose
+    @Json(name="approxDurationMs")
+    
     private String approxDurationMs;
-    @SerializedName("signatureCipher")
-    @Expose
+    @Json(name="signatureCipher")
+    
     private String signatureCipher;
-    @SerializedName("url")
-    @Expose
+    @Json(name="url")
+    
     private String url;
-    @SerializedName("colorInfo")
-    @Expose
+    @Json(name="colorInfo")
+    
     private ColorInfo colorInfo;
-    @SerializedName("highReplication")
-    @Expose
+    @Json(name="highReplication")
+    
     private Boolean highReplication;
-    @SerializedName("audioQuality")
-    @Expose
+    @Json(name="audioQuality")
+    
     private String audioQuality;
-    @SerializedName("audioSampleRate")
-    @Expose
+    @Json(name="audioSampleRate")
+    
     private Integer audioSampleRate;
-    @SerializedName("audioChannels")
-    @Expose
+    @Json(name="audioChannels")
+    
     private Integer audioChannels;
-    @SerializedName("loudnessDb")
-    @Expose
+    @Json(name="loudnessDb")
+    
     private Double loudnessDb;
 
     public Integer getItag() {

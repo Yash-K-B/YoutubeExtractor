@@ -3,9 +3,7 @@ package com.yash.youtubeextractor;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.service.autofill.FieldClassification;
-import android.util.Log;
-import android.view.View;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -16,13 +14,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yash.logging.LogHelper;
 import com.yash.youtube_extractor.Extractor;
+import com.yash.youtube_extractor.ExtractorHelper;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.VideoDetails;
-import com.yash.youtubeextractor.adapters.MyAdapter;
-import com.yash.youtubeextractor.databinding.ActivityKotlinTestBinding;
+import com.yash.youtube_extractor.models.YoutubeSong;
+import com.yash.youtubeextractor.adapters.PlaylistItemAdapter;
+import com.yash.youtubeextractor.adapters.StreamsAdapter;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     ActivityMainBinding mainBinding;
     BottomSheetBehavior bottomSheetBehavior;
-    Handler handler = new Handler();
+    Handler handler = new Handler(Looper.getMainLooper());
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,29 +53,42 @@ public class MainActivity extends AppCompatActivity {
 
         Button search = findViewById(R.id.search);
         search.setOnClickListener(v -> {
-            String[] parts = Objects.requireNonNull(mainBinding.link.getText()).toString().contains("=") ? Objects.requireNonNull(mainBinding.link.getText()).toString().split("=") : Objects.requireNonNull(mainBinding.link.getText()).toString().split("[/]");
+            String stringUrl = Objects.requireNonNull(mainBinding.link.getText()).toString();
+            String[] parts = stringUrl.contains("=") ? stringUrl.split("=") : stringUrl.split("[/]");
             String id = parts[parts.length - 1];
-            final Extractor extractor = new Extractor();
-            try {
-                extractor.extract(id, new Extractor.Callback() {
-                    @Override
-                    public void onSuccess(VideoDetails videoDetails) {
+            if (stringUrl.contains("playlist")) {
+                executorService.execute(() -> {
+                    List<YoutubeSong> songs = ExtractorHelper.playlistSongs(id);
+                    handler.post(() -> {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        MyAdapter adapter = new MyAdapter(MainActivity.this, new MyAdapter.MyData(videoDetails.getStreamingData()));
+                        PlaylistItemAdapter adapter = new PlaylistItemAdapter(MainActivity.this, songs);
                         mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
                         mainBinding.container.setAdapter(adapter);
-                    }
-
-                    @Override
-                    public void onError(ExtractionException e) {
-                        LogHelper.d(TAG, "onError: "+ e.getLocalizedMessage());
-                        Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                    }
+                    });
                 });
-            } catch (ExtractionException e) {
-                e.printStackTrace();
-            }
+            } else {
+                final Extractor extractor = new Extractor();
+                try {
+                    extractor.extract(id, new Extractor.Callback() {
+                        @Override
+                        public void onSuccess(VideoDetails videoDetails) {
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            StreamsAdapter adapter = new StreamsAdapter(MainActivity.this, new StreamsAdapter.MyData(videoDetails.getStreamingData()));
+                            mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+                            mainBinding.container.setAdapter(adapter);
+                        }
 
+                        @Override
+                        public void onError(ExtractionException e) {
+                            LogHelper.d(TAG, "onError: " + e.getLocalizedMessage());
+                            Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } catch (ExtractionException e) {
+                    e.printStackTrace();
+                }
+
+            }
 
             //LogHelper.d(TAG, "onCreate: "+streamingData.toString());
 
@@ -92,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
         });
         mainBinding.testKotlin.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, KotlinTestActivity.class);
+            startActivity(intent);
+        });
+
+        mainBinding.testChannel.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ChannelTestActivity.class);
             startActivity(intent);
         });
 
@@ -118,12 +140,12 @@ public class MainActivity extends AppCompatActivity {
         String id = null;
         Pattern pattern = Pattern.compile("https?://(www.)?youtube.com/shorts/([A-Za-z0-9]+)\\??.*");
         Matcher matcher = pattern.matcher(raw);
-        LogHelper.d(TAG, "extractVideoIdAndSet: "+ raw);
-        if(matcher.find()){
+        LogHelper.d(TAG, "extractVideoIdAndSet: " + raw);
+        if (matcher.find()) {
             id = matcher.group(2);
-            LogHelper.d(TAG, "extractVideoIdAndSet: "+id);
+            LogHelper.d(TAG, "extractVideoIdAndSet: " + id);
         }
-        if(id != null)
+        if (id != null)
             return String.format(outPattern, id);
         return raw;
     }

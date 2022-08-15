@@ -1,64 +1,64 @@
 package com.yash.youtube_extractor.models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+
+import com.squareup.moshi.Json;
 
 public class Format {
 
-    @SerializedName("itag")
-    @Expose
+    @Json(name="itag")
+    
     private Integer itag;
-    @SerializedName("mimeType")
-    @Expose
+    @Json(name="mimeType")
+    
     private String mimeType;
-    @SerializedName("bitrate")
-    @Expose
+    @Json(name="bitrate")
+    
     private Integer bitrate;
-    @SerializedName("width")
-    @Expose
+    @Json(name="width")
+    
     private Integer width;
-    @SerializedName("height")
-    @Expose
+    @Json(name="height")
+    
     private Integer height;
-    @SerializedName("lastModified")
-    @Expose
+    @Json(name="lastModified")
+    
     private String lastModified;
-    @SerializedName("contentLength")
-    @Expose
+    @Json(name="contentLength")
+    
     private Long contentLength;
-    @SerializedName("quality")
-    @Expose
+    @Json(name="quality")
+    
     private String quality;
-    @SerializedName("fps")
-    @Expose
+    @Json(name="fps")
+    
     private Integer fps;
-    @SerializedName("qualityLabel")
-    @Expose
+    @Json(name="qualityLabel")
+    
     private String qualityLabel;
-    @SerializedName("projectionType")
-    @Expose
+    @Json(name="projectionType")
+    
     private String projectionType;
-    @SerializedName("averageBitrate")
-    @Expose
+    @Json(name="averageBitrate")
+    
     private Integer averageBitrate;
-    @SerializedName("audioQuality")
-    @Expose
+    @Json(name="audioQuality")
+    
     private String audioQuality;
-    @SerializedName("approxDurationMs")
-    @Expose
+    @Json(name="approxDurationMs")
+    
     private String approxDurationMs;
-    @SerializedName("audioSampleRate")
-    @Expose
+    @Json(name="audioSampleRate")
+    
     private Integer audioSampleRate;
-    @SerializedName("audioChannels")
-    @Expose
+    @Json(name="audioChannels")
+    
     private Integer audioChannels;
-    @SerializedName("signatureCipher")
-    @Expose
+    @Json(name="signatureCipher")
+    
     private String signatureCipher;
 
-    @SerializedName("url")
-    @Expose
+    @Json(name="url")
+    
     private String url;
 
     public Integer getItag() {

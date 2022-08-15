@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class Icon{
 
-	@SerializedName("iconType")
+	@Json(name="iconType")
 	private String iconType;
 
 	public void setIconType(String iconType){

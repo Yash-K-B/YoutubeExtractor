@@ -1,16 +1,17 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
+import com.yash.youtube_extractor.pojo.common.Thumbnail;
 
 public class ChannelThumbnailWithLinkRenderer{
 
-	@SerializedName("thumbnail")
+	@Json(name="thumbnail")
 	private Thumbnail thumbnail;
 
-	@SerializedName("accessibility")
+	@Json(name="accessibility")
 	private Accessibility accessibility;
 
-	@SerializedName("navigationEndpoint")
+	@Json(name="navigationEndpoint")
 	private NavigationEndpoint navigationEndpoint;
 
 	public void setThumbnail(Thumbnail thumbnail){

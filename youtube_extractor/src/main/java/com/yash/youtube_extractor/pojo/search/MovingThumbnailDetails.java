@@ -1,14 +1,15 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
+import com.yash.youtube_extractor.pojo.common.ThumbnailsItem;
 
 public class MovingThumbnailDetails{
 
-	@SerializedName("logAsMovingThumbnail")
+	@Json(name="logAsMovingThumbnail")
 	private Boolean logAsMovingThumbnail;
 
-	@SerializedName("thumbnails")
+	@Json(name="thumbnails")
 	private List<ThumbnailsItem> thumbnails;
 
 	public void setLogAsMovingThumbnail(Boolean logAsMovingThumbnail){

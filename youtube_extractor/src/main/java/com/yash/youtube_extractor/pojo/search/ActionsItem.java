@@ -1,22 +1,22 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ActionsItem{
 
-	@SerializedName("clickTrackingParams")
+	@Json(name="clickTrackingParams")
 	private String clickTrackingParams;
 
-	@SerializedName("addToPlaylistCommand")
+	@Json(name="addToPlaylistCommand")
 	private AddToPlaylistCommand addToPlaylistCommand;
 
-	@SerializedName("addedVideoId")
+	@Json(name="addedVideoId")
 	private String addedVideoId;
 
-	@SerializedName("action")
+	@Json(name="action")
 	private String action;
 
-	@SerializedName("removedVideoId")
+	@Json(name="removedVideoId")
 	private String removedVideoId;
 
 	public void setClickTrackingParams(String clickTrackingParams){

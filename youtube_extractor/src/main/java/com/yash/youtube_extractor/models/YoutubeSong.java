@@ -2,7 +2,7 @@ package com.yash.youtube_extractor.models;
 
 public class YoutubeSong {
     String title,videoId,channelTitle,channelDesc;
-    String artUrlSmall,artUrlMedium;
+    String artUrlSmall,artUrlMedium, artUrlHigh;
     long durationMillis;
     String view;
 
@@ -70,6 +70,14 @@ public class YoutubeSong {
         this.view = view;
     }
 
+    public String getArtUrlHigh() {
+        return artUrlHigh;
+    }
+
+    public void setArtUrlHigh(String artUrlHigh) {
+        this.artUrlHigh = artUrlHigh;
+    }
+
     @Override
     public String toString() {
         return "YoutubeSong{" +
@@ -79,6 +87,7 @@ public class YoutubeSong {
                 ", channelDesc='" + channelDesc + '\'' +
                 ", artUrlSmall='" + artUrlSmall + '\'' +
                 ", artUrlMedium='" + artUrlMedium + '\'' +
+                ", artUrlHigh='" + artUrlHigh + '\'' +
                 ", durationMillis=" + durationMillis +
                 ", view='" + view + '\'' +
                 '}';

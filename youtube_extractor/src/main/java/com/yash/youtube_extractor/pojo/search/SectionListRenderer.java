@@ -1,11 +1,11 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class SectionListRenderer{
 
-	@SerializedName("contents")
+	@Json(name="contents")
 	private List<SelectionListContentsItem> contents;
 
 	public void setContents(List<SelectionListContentsItem> contents){

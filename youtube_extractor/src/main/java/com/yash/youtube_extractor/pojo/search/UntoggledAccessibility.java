@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class UntoggledAccessibility{
 
-	@SerializedName("accessibilityData")
+	@Json(name="accessibilityData")
 	private AccessibilityData accessibilityData;
 
 	public void setAccessibilityData(AccessibilityData accessibilityData){

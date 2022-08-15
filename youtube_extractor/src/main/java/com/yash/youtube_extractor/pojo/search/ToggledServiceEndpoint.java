@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ToggledServiceEndpoint{
 
-	@SerializedName("commandMetadata")
+	@Json(name="commandMetadata")
 	private CommandMetadata commandMetadata;
 
-	@SerializedName("playlistEditEndpoint")
+	@Json(name="playlistEditEndpoint")
 	private PlaylistEditEndpoint playlistEditEndpoint;
 
-	@SerializedName("clickTrackingParams")
+	@Json(name="clickTrackingParams")
 	private String clickTrackingParams;
 
 	public void setCommandMetadata(CommandMetadata commandMetadata){

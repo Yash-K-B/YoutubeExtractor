@@ -1,19 +1,19 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class MenuServiceItemRenderer{
 
-	@SerializedName("trackingParams")
+	@Json(name="trackingParams")
 	private String trackingParams;
 
-	@SerializedName("icon")
+	@Json(name="icon")
 	private Icon icon;
 
-	@SerializedName("text")
+	@Json(name="text")
 	private Text text;
 
-	@SerializedName("serviceEndpoint")
+	@Json(name="serviceEndpoint")
 	private ServiceEndpoint serviceEndpoint;
 
 	public void setTrackingParams(String trackingParams){

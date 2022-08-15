@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ChannelThumbnailSupportedRenderers{
 
-	@SerializedName("channelThumbnailWithLinkRenderer")
+	@Json(name="channelThumbnailWithLinkRenderer")
 	private ChannelThumbnailWithLinkRenderer channelThumbnailWithLinkRenderer;
 
 	public void setChannelThumbnailWithLinkRenderer(ChannelThumbnailWithLinkRenderer channelThumbnailWithLinkRenderer){

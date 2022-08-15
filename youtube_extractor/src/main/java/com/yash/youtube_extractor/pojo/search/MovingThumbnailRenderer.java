@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class MovingThumbnailRenderer{
 
-	@SerializedName("enableOverlay")
+	@Json(name="enableOverlay")
 	private Boolean enableOverlay;
 
-	@SerializedName("enableHoveredLogging")
+	@Json(name="enableHoveredLogging")
 	private Boolean enableHoveredLogging;
 
-	@SerializedName("movingThumbnailDetails")
+	@Json(name="movingThumbnailDetails")
 	private MovingThumbnailDetails movingThumbnailDetails;
 
 	public void setEnableOverlay(Boolean enableOverlay){

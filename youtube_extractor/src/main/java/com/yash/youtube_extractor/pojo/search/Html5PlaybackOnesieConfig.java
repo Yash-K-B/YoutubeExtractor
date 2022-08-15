@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class Html5PlaybackOnesieConfig{
 
-	@SerializedName("commonConfig")
+	@Json(name="commonConfig")
 	private CommonConfig commonConfig;
 
 	public void setCommonConfig(CommonConfig commonConfig){

@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class WatchEndpointSupportedOnesieConfig{
 
-	@SerializedName("html5PlaybackOnesieConfig")
+	@Json(name="html5PlaybackOnesieConfig")
 	private Html5PlaybackOnesieConfig html5PlaybackOnesieConfig;
 
 	public void setHtml5PlaybackOnesieConfig(Html5PlaybackOnesieConfig html5PlaybackOnesieConfig){

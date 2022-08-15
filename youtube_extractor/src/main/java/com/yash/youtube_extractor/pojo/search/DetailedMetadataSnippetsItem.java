@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class DetailedMetadataSnippetsItem{
 
-	@SerializedName("maxOneLine")
+	@Json(name="maxOneLine")
 	private Boolean maxOneLine;
 
-	@SerializedName("snippetText")
+	@Json(name="snippetText")
 	private SnippetText snippetText;
 
-	@SerializedName("snippetHoverText")
+	@Json(name="snippetHoverText")
 	private SnippetHoverText snippetHoverText;
 
 	public void setMaxOneLine(Boolean maxOneLine){

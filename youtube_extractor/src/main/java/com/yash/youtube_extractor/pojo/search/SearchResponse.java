@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class SearchResponse{
 
-	@SerializedName("primaryContents")
+	@Json(name="primaryContents")
 	private PrimaryContents primaryContents;
 
 	public void setPrimaryContents(PrimaryContents primaryContents){

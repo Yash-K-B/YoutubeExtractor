@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class PrimaryContents{
 
-	@SerializedName("sectionListRenderer")
+	@Json(name="sectionListRenderer")
 	private SectionListRenderer sectionListRenderer;
 
 	public void setSectionListRenderer(SectionListRenderer sectionListRenderer){

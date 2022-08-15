@@ -1,11 +1,11 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class SnippetHoverText{
 
-	@SerializedName("runs")
+	@Json(name="runs")
 	private List<RunsItem> runs;
 
 	public void setRuns(List<RunsItem> runs){

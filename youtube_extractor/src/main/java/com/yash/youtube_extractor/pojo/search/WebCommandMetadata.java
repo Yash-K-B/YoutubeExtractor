@@ -1,22 +1,22 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class WebCommandMetadata{
 
-	@SerializedName("rootVe")
+	@Json(name="rootVe")
 	private Integer rootVe;
 
-	@SerializedName("webPageType")
+	@Json(name="webPageType")
 	private String webPageType;
 
-	@SerializedName("url")
+	@Json(name="url")
 	private String url;
 
-	@SerializedName("apiUrl")
+	@Json(name="apiUrl")
 	private String apiUrl;
 
-	@SerializedName("sendPost")
+	@Json(name="sendPost")
 	private Boolean sendPost;
 
 	public void setRootVe(Integer rootVe){

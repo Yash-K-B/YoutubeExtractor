@@ -1,23 +1,23 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class AddToPlaylistCommand{
 
-	@SerializedName("onCreateListCommand")
+	@Json(name="onCreateListCommand")
 	private OnCreateListCommand onCreateListCommand;
 
-	@SerializedName("videoId")
+	@Json(name="videoId")
 	private String videoId;
 
-	@SerializedName("openMiniplayer")
+	@Json(name="openMiniplayer")
 	private Boolean openMiniplayer;
 
-	@SerializedName("listType")
+	@Json(name="listType")
 	private String listType;
 
-	@SerializedName("videoIds")
+	@Json(name="videoIds")
 	private List<String> videoIds;
 
 	public void setOnCreateListCommand(OnCreateListCommand onCreateListCommand){

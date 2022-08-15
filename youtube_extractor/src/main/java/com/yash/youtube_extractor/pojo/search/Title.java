@@ -1,17 +1,18 @@
 package com.yash.youtube_extractor.pojo.search;
 
+import com.squareup.moshi.Json;
+
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
 
 public class Title{
 
-	@SerializedName("accessibility")
+	@Json(name="accessibility")
 	private Accessibility accessibility;
 
-	@SerializedName("runs")
+	@Json(name="runs")
 	private List<RunsItem> runs;
 
-	@SerializedName("simpleText")
+	@Json(name="simpleText")
 	private String simpleText;
 
 	public void setAccessibility(Accessibility accessibility){
