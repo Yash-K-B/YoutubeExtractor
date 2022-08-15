@@ -148,6 +148,8 @@ public class ExtractorHelper {
                 youtubeSong.setVideoId(videoRenderer.getVideoId());
                 String videoTitle = CollectionUtility.isEmpty(videoRenderer.getTitle().getRuns()) ? "Unknown" : videoRenderer.getTitle().getRuns().get(0).getText();
                 youtubeSong.setTitle(videoTitle);
+                String channelTitle = CollectionUtility.isEmpty(videoRenderer.getShortBylineText().getRuns()) ? "Unknown" : videoRenderer.getShortBylineText().getRuns().get(0).getText();
+                youtubeSong.setChannelTitle(channelTitle);
                 youtubeSong.setDurationMillis(CommonUtility.fromLengthText(videoRenderer.getLengthText()));
                 List<ThumbnailsItem> thumbnails = videoRenderer.getThumbnail().getThumbnails();
                 Collections.sort(thumbnails, (o1, o2) -> o1.getWidth().compareTo(o2.getWidth()));
