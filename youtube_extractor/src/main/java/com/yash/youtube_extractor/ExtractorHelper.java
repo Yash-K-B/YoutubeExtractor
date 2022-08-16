@@ -193,9 +193,9 @@ public class ExtractorHelper {
                         continue;
                     Title title = shelfRenderer.getTitle();
                     List<YoutubePlaylist> playlists = new ArrayList<>();
-                    YoutubePlaylist playlist = new YoutubePlaylist();
                     for (PlaylistItem playlistItem : shelfRenderer.getContent().getHorizontalListRenderer().getItems()) {
                         CompactStationRenderer compactStationRenderer = playlistItem.getCompactStationRenderer();
+                        YoutubePlaylist playlist = new YoutubePlaylist();
                         if (compactStationRenderer == null) {
                             GridPlaylistRenderer gridPlaylistRenderer = playlistItem.getGridPlaylistRenderer();
                             if (gridPlaylistRenderer == null)
