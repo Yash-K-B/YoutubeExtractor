@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.yash.youtubeextractor"
         minSdkVersion 21
-        targetSdkVersion 31
-        versionCode 7
-        versionName "1.1.7"
+        targetSdkVersion 33
+        versionCode 8
+        versionName "1.1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

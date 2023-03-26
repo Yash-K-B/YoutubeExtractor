@@ -12,7 +12,10 @@ import org.mozilla.javascript.Scriptable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class StreamingData implements Serializable {
 
@@ -654,12 +657,18 @@ public class StreamingData implements Serializable {
 
     public static String cipherDecoder(String encodedCipher, Decoder decoder) {
         if (decoder == null) return "";
-        String[] parts = encodedCipher.split("&", 3);
-        parts[0] = Uri.decode(parts[0].replace("s=", ""));
-        parts[1] = Uri.decode(parts[1].replace("sp=", ""));
-        parts[2] = parts[2].replace("url=", "");
-        parts[2] = Uri.decode(parts[2].replace("\\/", "/"));
-        return parts[2] + "&" + parts[1] + "=" + decoder.decode(parts[0]);
+        Map<String, String> queryParams = new HashMap<>();
+        for (String param : encodedCipher.split("&", 3)) {
+            String[] splits = param.split("=", 2);
+            queryParams.put(splits[0], splits.length > 1 ? splits[splits.length - 1] : "");
+        }
+        String encodedUrl = queryParams.get("url");
+        if(encodedUrl == null)
+            return null;
+        String url = Uri.decode(encodedUrl.replace("\\/", "/"));
+        String paramKey = Uri.decode(queryParams.get("sp"));
+        String signature = Uri.decode(queryParams.get("s"));
+        return String.format(Locale.US, "%s&%s=%s", url, paramKey, Uri.encode(decoder.decode(signature)));
     }
 
 

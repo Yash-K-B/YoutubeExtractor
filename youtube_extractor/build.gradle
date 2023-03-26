@@ -36,5 +36,5 @@ dependencies {
 
     implementation 'org.mozilla:rhino:1.7.10'
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
 }

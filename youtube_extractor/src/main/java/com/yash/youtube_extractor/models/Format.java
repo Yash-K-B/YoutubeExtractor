@@ -207,9 +207,9 @@ public class Format {
         this.url = url;
     }
 
-    public void decoder(StreamingData.Decoder decoder){
-        if (signatureCipher != null && decoder != null) {
-            setUrl(StreamingData.cipherDecoder(signatureCipher,decoder));
+    public void decoder(StreamingData.Decoder decoder) {
+        if (this.signatureCipher != null && decoder != null) {
+            this.url = (StreamingData.cipherDecoder(this.signatureCipher, decoder));
         }
     }
 

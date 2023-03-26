@@ -1,4 +1,4 @@
-package com.yash.youtubeextractor.utils;
+package com.yash.youtube_extractor.utility;
 
 import java.text.DecimalFormat;
 import java.util.Locale;

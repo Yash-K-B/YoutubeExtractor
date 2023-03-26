@@ -12,6 +12,7 @@ import com.yash.youtube_extractor.models.StreamingData;
 import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
 import com.yash.youtube_extractor.utility.CommonUtility;
+import com.yash.youtube_extractor.utility.ConverterUtil;
 import com.yash.youtube_extractor.utility.JsonUtil;
 
 import org.json.JSONObject;
@@ -24,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -120,7 +123,7 @@ public class Extractor {
             videoData.setChannelThumbnail(channelThumbnail);
 
             end = SystemClock.currentThreadTimeMillis();
-            Log.d("YOUTUBE_EXTRACTOR", "extract : " + (end - start) / 1000.0 + "s");
+            Log.d("YOUTUBE_EXTRACTOR", "extract : " + ConverterUtil.formatDuration(end - start));
             return new VideoDetails(streamingData, videoData);
 
         } catch (Exception e) {
