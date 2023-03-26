@@ -1,13 +1,13 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class BrowseEndpoint{
 
-	@SerializedName("browseId")
+	@Json(name="browseId")
 	private String browseId;
 
-	@SerializedName("canonicalBaseUrl")
+	@Json(name="canonicalBaseUrl")
 	private String canonicalBaseUrl;
 
 	public void setBrowseId(String browseId){

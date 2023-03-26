@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class Menu{
 
-	@SerializedName("menuRenderer")
+	@Json(name="menuRenderer")
 	private MenuRenderer menuRenderer;
 
 	public void setMenuRenderer(MenuRenderer menuRenderer){

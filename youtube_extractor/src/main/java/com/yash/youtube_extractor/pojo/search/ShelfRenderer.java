@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ShelfRenderer{
 
-	@SerializedName("trackingParams")
+	@Json(name="trackingParams")
 	private String trackingParams;
 
-	@SerializedName("title")
+	@Json(name="title")
 	private Title title;
 
-	@SerializedName("content")
+	@Json(name="content")
 	private Content content;
 
 	public void setTrackingParams(String trackingParams){

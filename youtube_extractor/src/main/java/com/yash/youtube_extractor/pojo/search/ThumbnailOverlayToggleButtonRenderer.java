@@ -1,37 +1,37 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ThumbnailOverlayToggleButtonRenderer{
 
-	@SerializedName("untoggledIcon")
+	@Json(name="untoggledIcon")
 	private UntoggledIcon untoggledIcon;
 
-	@SerializedName("toggledIcon")
+	@Json(name="toggledIcon")
 	private ToggledIcon toggledIcon;
 
-	@SerializedName("toggledTooltip")
+	@Json(name="toggledTooltip")
 	private String toggledTooltip;
 
-	@SerializedName("trackingParams")
+	@Json(name="trackingParams")
 	private String trackingParams;
 
-	@SerializedName("toggledAccessibility")
+	@Json(name="toggledAccessibility")
 	private ToggledAccessibility toggledAccessibility;
 
-	@SerializedName("untoggledTooltip")
+	@Json(name="untoggledTooltip")
 	private String untoggledTooltip;
 
-	@SerializedName("untoggledAccessibility")
+	@Json(name="untoggledAccessibility")
 	private UntoggledAccessibility untoggledAccessibility;
 
-	@SerializedName("untoggledServiceEndpoint")
+	@Json(name="untoggledServiceEndpoint")
 	private UntoggledServiceEndpoint untoggledServiceEndpoint;
 
-	@SerializedName("toggledServiceEndpoint")
+	@Json(name="toggledServiceEndpoint")
 	private ToggledServiceEndpoint toggledServiceEndpoint;
 
-	@SerializedName("isToggled")
+	@Json(name="isToggled")
 	private Boolean isToggled;
 
 	public void setUntoggledIcon(UntoggledIcon untoggledIcon){

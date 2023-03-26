@@ -4,8 +4,7 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -21,13 +20,11 @@ public class StreamingData implements Serializable {
 
 
     boolean isFormatInitialized = false;
-    @SerializedName("expiresInSeconds")
+    @Json(name = "expiresInSeconds")
     private String expiresInSeconds;
-    @SerializedName("formats")
-    @Expose
+    @Json(name = "formats")
     private List<Format> formats = null;
-    @SerializedName("adaptiveFormats")
-    @Expose
+    @Json(name = "adaptiveFormats")
     private List<AdaptiveFormat> adaptiveFormats = null;
 
     private List<AdaptiveAudioFormat> adaptiveAudioFormats = new ArrayList<>();
@@ -89,14 +86,11 @@ public class StreamingData implements Serializable {
 
     public static class ColorInfo {
 
-        @SerializedName("primaries")
-        @Expose
+        @Json(name = "primaries")
         private String primaries;
-        @SerializedName("transferCharacteristics")
-        @Expose
+        @Json(name = "transferCharacteristics")
         private String transferCharacteristics;
-        @SerializedName("matrixCoefficients")
-        @Expose
+        @Json(name = "matrixCoefficients")
         private String matrixCoefficients;
 
         public String getPrimaries() {
@@ -127,11 +121,9 @@ public class StreamingData implements Serializable {
 
     public static class IndexRange {
 
-        @SerializedName("start")
-        @Expose
+        @Json(name = "start")
         private String start;
-        @SerializedName("end")
-        @Expose
+        @Json(name = "end")
         private String end;
 
         public String getStart() {
@@ -154,11 +146,9 @@ public class StreamingData implements Serializable {
 
     public static class InitRange {
 
-        @SerializedName("start")
-        @Expose
+        @Json(name="start")
         private String start;
-        @SerializedName("end")
-        @Expose
+        @Json(name="end")
         private String end;
 
         public String getStart() {
@@ -204,53 +194,37 @@ public class StreamingData implements Serializable {
             this.url = format.getUrl() == null ? StreamingData.cipherDecoder(format.getSignatureCipher(), decoder) : format.getUrl();
         }
 
-        @SerializedName("itag")
-        @Expose
+        @Json(name="itag")
         private Integer itag;
-        @SerializedName("mimeType")
-        @Expose
+        @Json(name="mimeType")
         private String mimeType;
-        @SerializedName("bitrate")
-        @Expose
+        @Json(name="bitrate")
         private Integer bitrate;
-        @SerializedName("initRange")
-        @Expose
+        @Json(name="initRange")
         private InitRange initRange;
-        @SerializedName("indexRange")
-        @Expose
+        @Json(name="indexRange")
         private IndexRange indexRange;
-        @SerializedName("lastModified")
-        @Expose
+        @Json(name="lastModified")
         private String lastModified;
-        @SerializedName("contentLength")
-        @Expose
+        @Json(name="contentLength")
         private Long contentLength;
-        @SerializedName("quality")
-        @Expose
+        @Json(name="quality")
         private String quality;
-        @SerializedName("projectionType")
-        @Expose
+        @Json(name="projectionType")
         private String projectionType;
-        @SerializedName("averageBitrate")
-        @Expose
+        @Json(name="averageBitrate")
         private Integer averageBitrate;
-        @SerializedName("highReplication")
-        @Expose
+        @Json(name="highReplication")
         private Boolean highReplication;
-        @SerializedName("audioQuality")
-        @Expose
+        @Json(name="audioQuality")
         private String audioQuality;
-        @SerializedName("approxDurationMs")
-        @Expose
+        @Json(name="approxDurationMs")
         private String approxDurationMs;
-        @SerializedName("audioSampleRate")
-        @Expose
+        @Json(name="audioSampleRate")
         private Integer audioSampleRate;
-        @SerializedName("audioChannels")
-        @Expose
+        @Json(name="audioChannels")
         private Integer audioChannels;
-        @SerializedName("loudnessDb")
-        @Expose
+        @Json(name="loudnessDb")
         private Double loudnessDb;
 
         private String url;
@@ -441,50 +415,35 @@ public class StreamingData implements Serializable {
             this.url = format.getUrl() == null ? StreamingData.cipherDecoder(format.getSignatureCipher(), decoder) : format.getUrl();
         }
 
-        @SerializedName("itag")
-        @Expose
+        @Json(name="itag")
         private Integer itag;
-        @SerializedName("mimeType")
-        @Expose
+        @Json(name="mimeType")
         private String mimeType;
-        @SerializedName("bitrate")
-        @Expose
+        @Json(name="bitrate")
         private Integer bitrate;
-        @SerializedName("width")
-        @Expose
+        @Json(name="width")
         private Integer width;
-        @SerializedName("height")
-        @Expose
+        @Json(name="height")
         private Integer height;
-        @SerializedName("initRange")
-        @Expose
+        @Json(name="initRange")
         private InitRange initRange;
-        @SerializedName("indexRange")
-        @Expose
+        @Json(name="indexRange")
         private IndexRange indexRange;
-        @SerializedName("lastModified")
-        @Expose
+        @Json(name="lastModified")
         private String lastModified;
-        @SerializedName("contentLength")
-        @Expose
+        @Json(name="contentLength")
         private Long contentLength;
-        @SerializedName("quality")
-        @Expose
+        @Json(name="quality")
         private String quality;
-        @SerializedName("fps")
-        @Expose
+        @Json(name="fps")
         private Integer fps;
-        @SerializedName("qualityLabel")
-        @Expose
+        @Json(name="qualityLabel")
         private String qualityLabel;
-        @SerializedName("projectionType")
-        @Expose
+        @Json(name="projectionType")
         private String projectionType;
-        @SerializedName("averageBitrate")
-        @Expose
+        @Json(name="averageBitrate")
         private Integer averageBitrate;
-        @SerializedName("approxDurationMs")
-        @Expose
+        @Json(name="approxDurationMs")
         private String approxDurationMs;
 
         private String url;

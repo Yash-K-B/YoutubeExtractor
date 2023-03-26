@@ -1,58 +1,55 @@
 package com.yash.youtube_extractor.models;
 
 import java.util.List;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+
+import com.squareup.moshi.Json;
 
 public class VideoData {
 
-    @SerializedName("videoId")
-    @Expose
+    @Json(name = "videoId")
     private String videoId;
-    @SerializedName("title")
-    @Expose
+    @Json(name = "title")
     private String title;
-    @SerializedName("lengthSeconds")
-    @Expose
+    @Json(name = "lengthSeconds")
     private String lengthSeconds;
-    @SerializedName("keywords")
-    @Expose
+    @Json(name="keywords")
+    
     private List<String> keywords = null;
-    @SerializedName("channelId")
-    @Expose
+    @Json(name="channelId")
+    
     private String channelId;
-    @SerializedName("isOwnerViewing")
-    @Expose
+    @Json(name="isOwnerViewing")
+    
     private Boolean isOwnerViewing;
-    @SerializedName("shortDescription")
-    @Expose
+    @Json(name="shortDescription")
+    
     private String shortDescription;
-    @SerializedName("isCrawlable")
-    @Expose
+    @Json(name="isCrawlable")
+    
     private Boolean isCrawlable;
-    @SerializedName("thumbnail")
-    @Expose
+    @Json(name="thumbnail")
+    
     private Thumbnail thumbnail;
-    @SerializedName("averageRating")
-    @Expose
+    @Json(name="averageRating")
+    
     private Double averageRating;
-    @SerializedName("allowRatings")
-    @Expose
+    @Json(name="allowRatings")
+    
     private Boolean allowRatings;
-    @SerializedName("viewCount")
-    @Expose
+    @Json(name="viewCount")
+    
     private String viewCount;
-    @SerializedName("author")
-    @Expose
+    @Json(name="author")
+    
     private String author;
-    @SerializedName("isPrivate")
-    @Expose
+    @Json(name="isPrivate")
+    
     private Boolean isPrivate;
-    @SerializedName("isUnpluggedCorpus")
-    @Expose
+    @Json(name="isUnpluggedCorpus")
+    
     private Boolean isUnpluggedCorpus;
-    @SerializedName("isLiveContent")
-    @Expose
+    @Json(name="isLiveContent")
+    
     private Boolean isLiveContent;
 
     private ChannelThumbnail channelThumbnail;
@@ -218,8 +215,8 @@ public class VideoData {
 
     public static class Thumbnail {
 
-        @SerializedName("thumbnails")
-        @Expose
+        @Json(name="thumbnails")
+        
         private List<Thumbnail_> thumbnails = null;
 
         public List<Thumbnail_> getThumbnails() {
@@ -235,14 +232,14 @@ public class VideoData {
 
     public static class Thumbnail_ {
 
-        @SerializedName("url")
-        @Expose
+        @Json(name="url")
+        
         private String url;
-        @SerializedName("width")
-        @Expose
+        @Json(name="width")
+        
         private Integer width;
-        @SerializedName("height")
-        @Expose
+        @Json(name="height")
+        
         private Integer height;
 
         public String getUrl() {

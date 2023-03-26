@@ -1,16 +1,16 @@
-package com.yash.youtube_extractor.pojo.search;
+package com.yash.youtube_extractor.pojo.common;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ThumbnailsItem{
 
-	@SerializedName("width")
+	@Json(name="width")
 	private Integer width;
 
-	@SerializedName("url")
+	@Json(name="url")
 	private String url;
 
-	@SerializedName("height")
+	@Json(name="height")
 	private Integer height;
 
 	public void setWidth(Integer width){

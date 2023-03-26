@@ -1,14 +1,14 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class PlaylistEditEndpoint{
 
-	@SerializedName("playlistId")
+	@Json(name="playlistId")
 	private String playlistId;
 
-	@SerializedName("actions")
+	@Json(name="actions")
 	private List<ActionsItem> actions;
 
 	public void setPlaylistId(String playlistId){

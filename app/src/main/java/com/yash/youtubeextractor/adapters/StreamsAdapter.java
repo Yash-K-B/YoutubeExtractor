@@ -22,24 +22,24 @@ import java.util.regex.Matcher;
 
 import static android.content.Context.CLIPBOARD_SERVICE;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+public class StreamsAdapter extends RecyclerView.Adapter<StreamsAdapter.StreamViewHolder> {
     MyData data;
     Context context;
 
 
-    public MyAdapter(Context context, MyData data) {
+    public StreamsAdapter(Context context, MyData data) {
         this.context = context;
         this.data = data;
     }
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MyViewHolder(ListItemBinding.inflate(LayoutInflater.from(parent.getContext())));
+    public StreamViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new StreamViewHolder(ListItemBinding.inflate(LayoutInflater.from(parent.getContext())));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull StreamViewHolder holder, int position) {
         holder.bind(data, position, context);
     }
 
@@ -48,10 +48,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return (data.getAudioStreams().size() + data.getVideoStreams().size() + data.getMuxedStreams().size());
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class StreamViewHolder extends RecyclerView.ViewHolder {
         ListItemBinding binding;
 
-        public MyViewHolder(@NonNull ListItemBinding binding) {
+        public StreamViewHolder(@NonNull ListItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

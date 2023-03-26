@@ -5,19 +5,23 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".YoutubeExtractor"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".YoutubeExtractor"
         android:theme="@style/AppTheme">
-        <activity android:name=".KotlinTestActivity"
-            android:exported="true"/>
+        <activity
+            android:name=".ChannelTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".KotlinTestActivity"
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

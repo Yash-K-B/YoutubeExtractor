@@ -1,12 +1,12 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ItemSelectionContentsItem {
-    @SerializedName("videoRenderer")
+    @Json(name="videoRenderer")
     private VideoRenderer videoRenderer;
 
-    @SerializedName("shelfRenderer")
+    @Json(name="shelfRenderer")
     private ShelfRenderer shelfRenderer;
 
     public VideoRenderer getVideoRenderer() {

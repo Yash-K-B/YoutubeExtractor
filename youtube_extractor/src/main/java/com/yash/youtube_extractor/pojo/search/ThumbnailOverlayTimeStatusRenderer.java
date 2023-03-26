@@ -1,13 +1,13 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ThumbnailOverlayTimeStatusRenderer{
 
-	@SerializedName("style")
+	@Json(name="style")
 	private String style;
 
-	@SerializedName("text")
+	@Json(name="text")
 	private Text text;
 
 	public void setStyle(String style){

@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ThumbnailOverlayNowPlayingRenderer{
 
-	@SerializedName("text")
+	@Json(name="text")
 	private Text text;
 
 	public void setText(Text text){

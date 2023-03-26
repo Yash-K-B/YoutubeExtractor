@@ -1,13 +1,13 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class ShortViewCountText{
 
-	@SerializedName("simpleText")
+	@Json(name="simpleText")
 	private String simpleText;
 
-	@SerializedName("accessibility")
+	@Json(name="accessibility")
 	private Accessibility accessibility;
 
 	public void setSimpleText(String simpleText){

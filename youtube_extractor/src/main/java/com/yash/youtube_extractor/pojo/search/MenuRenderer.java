@@ -1,17 +1,17 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class MenuRenderer{
 
-	@SerializedName("trackingParams")
+	@Json(name="trackingParams")
 	private String trackingParams;
 
-	@SerializedName("accessibility")
+	@Json(name="accessibility")
 	private Accessibility accessibility;
 
-	@SerializedName("items")
+	@Json(name="items")
 	private List<ItemsItem> items;
 
 	public void setTrackingParams(String trackingParams){

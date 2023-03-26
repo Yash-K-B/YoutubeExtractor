@@ -1,14 +1,26 @@
-package com.yash.youtube_extractor.pojo.search;
+package com.yash.youtube_extractor.pojo.playlist;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
+import com.squareup.moshi.Json;
 
-public class LengthText{
+public class Text{
 
-	@SerializedName("simpleText")
+	@Json(name="runs")
+	private List<RunsItem> runs;
+
+	@Json(name="simpleText")
 	private String simpleText;
 
-	@SerializedName("accessibility")
+	@Json(name="accessibility")
 	private Accessibility accessibility;
+
+	public void setRuns(List<RunsItem> runs){
+		this.runs = runs;
+	}
+
+	public List<RunsItem> getRuns(){
+		return runs;
+	}
 
 	public void setSimpleText(String simpleText){
 		this.simpleText = simpleText;
@@ -29,8 +41,9 @@ public class LengthText{
 	@Override
  	public String toString(){
 		return 
-			"LengthText{" + 
-			"simpleText = '" + simpleText + '\'' + 
+			"Text{" + 
+			"runs = '" + runs + '\'' + 
+			",simpleText = '" + simpleText + '\'' + 
 			",accessibility = '" + accessibility + '\'' + 
 			"}";
 		}

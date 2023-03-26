@@ -1,14 +1,14 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class CollapsedStateButtonText{
 
-	@SerializedName("accessibility")
+	@Json(name="accessibility")
 	private Accessibility accessibility;
 
-	@SerializedName("runs")
+	@Json(name="runs")
 	private List<RunsItem> runs;
 
 	public void setAccessibility(Accessibility accessibility){

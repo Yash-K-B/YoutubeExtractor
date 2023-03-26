@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class RunsItem{
 
-	@SerializedName("text")
+	@Json(name="text")
 	private String text;
 
-	@SerializedName("bold")
+	@Json(name="bold")
 	private Boolean bold;
 
-	@SerializedName("navigationEndpoint")
+	@Json(name="navigationEndpoint")
 	private NavigationEndpoint navigationEndpoint;
 
 	public void setText(String text){

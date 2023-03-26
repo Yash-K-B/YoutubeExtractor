@@ -1,11 +1,12 @@
-package com.yash.youtube_extractor.pojo.search;
+package com.yash.youtube_extractor.pojo.common;
+
+import com.squareup.moshi.Json;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
 
 public class Thumbnail{
 
-	@SerializedName("thumbnails")
+	@Json(name="thumbnails")
 	private List<ThumbnailsItem> thumbnails;
 
 	public void setThumbnails(List<ThumbnailsItem> thumbnails){

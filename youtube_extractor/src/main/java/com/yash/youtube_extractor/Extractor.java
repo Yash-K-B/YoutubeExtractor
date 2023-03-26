@@ -5,7 +5,9 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.google.gson.Gson;
+
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.ChannelThumbnail;
 import com.yash.youtube_extractor.models.StreamingData;
@@ -65,15 +67,15 @@ public class Extractor {
                 result = extractJsonFromHtml(html);
             }
 
-            Gson gson = new Gson();
+            Moshi moshi = new Moshi.Builder().build();
 
             /* EXTRACTING Channel Thumbnails */
             String channelThumbnailJson = JsonUtil.extractJsonFromHtml("\"channelThumbnail\":{", html);
-            ChannelThumbnail channelThumbnail = gson.fromJson(channelThumbnailJson, ChannelThumbnail.class);
+            ChannelThumbnail channelThumbnail = moshi.adapter(ChannelThumbnail.class).fromJson(channelThumbnailJson);
 
 
             JSONObject object = new JSONObject(result);
-            StreamingData streamingData = gson.fromJson(object.getString("streamingData"), StreamingData.class);
+            StreamingData streamingData = moshi.adapter(StreamingData.class).fromJson(object.getString("streamingData"));
 
             int index = result.indexOf("\"signatureCipher\"");
 
@@ -119,7 +121,7 @@ public class Extractor {
                 });
             } else streamingData.initObject(null);
 
-            VideoData videoData = gson.fromJson(object.getString("videoDetails"), VideoData.class);
+            VideoData videoData = moshi.adapter(VideoData.class).fromJson(object.getString("videoDetails"));
             videoData.setChannelThumbnail(channelThumbnail);
 
             end = SystemClock.currentThreadTimeMillis();
@@ -173,11 +175,3 @@ public class Extractor {
         void onError(ExtractionException e);
     }
 }
-
-
-//            File file = new File(context.getFilesDir(),"html.txt");
-//            FileOutputStream fileOutputStream = new FileOutputStream(file);
-//            DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
-//            dataOutputStream.writeBytes(s);
-//            dataOutputStream.close();
-//            fileOutputStream.close();

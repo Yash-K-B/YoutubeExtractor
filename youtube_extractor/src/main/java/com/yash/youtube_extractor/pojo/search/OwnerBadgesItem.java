@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class OwnerBadgesItem{
 
-	@SerializedName("metadataBadgeRenderer")
+	@Json(name="metadataBadgeRenderer")
 	private MetadataBadgeRenderer metadataBadgeRenderer;
 
 	public void setMetadataBadgeRenderer(MetadataBadgeRenderer metadataBadgeRenderer){

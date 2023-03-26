@@ -1,25 +1,25 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class MetadataBadgeRenderer{
 
-	@SerializedName("trackingParams")
+	@Json(name="trackingParams")
 	private String trackingParams;
 
-	@SerializedName("style")
+	@Json(name="style")
 	private String style;
 
-	@SerializedName("label")
+	@Json(name="label")
 	private String label;
 
-	@SerializedName("accessibilityData")
+	@Json(name="accessibilityData")
 	private AccessibilityData accessibilityData;
 
-	@SerializedName("icon")
+	@Json(name="icon")
 	private Icon icon;
 
-	@SerializedName("tooltip")
+	@Json(name="tooltip")
 	private String tooltip;
 
 	public void setTrackingParams(String trackingParams){

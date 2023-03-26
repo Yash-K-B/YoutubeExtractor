@@ -1,16 +1,16 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class WatchEndpoint{
 
-	@SerializedName("watchEndpointSupportedOnesieConfig")
+	@Json(name="watchEndpointSupportedOnesieConfig")
 	private WatchEndpointSupportedOnesieConfig watchEndpointSupportedOnesieConfig;
 
-	@SerializedName("videoId")
+	@Json(name="videoId")
 	private String videoId;
 
-	@SerializedName("params")
+	@Json(name="params")
 	private String params;
 
 	public void setWatchEndpointSupportedOnesieConfig(WatchEndpointSupportedOnesieConfig watchEndpointSupportedOnesieConfig){

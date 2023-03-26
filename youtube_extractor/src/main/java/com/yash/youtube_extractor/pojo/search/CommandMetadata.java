@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class CommandMetadata{
 
-	@SerializedName("webCommandMetadata")
+	@Json(name="webCommandMetadata")
 	private WebCommandMetadata webCommandMetadata;
 
 	public void setWebCommandMetadata(WebCommandMetadata webCommandMetadata){

@@ -1,14 +1,14 @@
 package com.yash.youtube_extractor.pojo.search;
 
 import java.util.List;
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class SignalServiceEndpoint{
 
-	@SerializedName("signal")
+	@Json(name="signal")
 	private String signal;
 
-	@SerializedName("actions")
+	@Json(name="actions")
 	private List<ActionsItem> actions;
 
 	public void setSignal(String signal){

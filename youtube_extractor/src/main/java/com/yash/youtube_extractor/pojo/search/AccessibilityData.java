@@ -1,10 +1,10 @@
 package com.yash.youtube_extractor.pojo.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.squareup.moshi.Json;
 
 public class AccessibilityData{
 
-	@SerializedName("label")
+	@Json(name="label")
 	private String label;
 
 	public void setLabel(String label){
