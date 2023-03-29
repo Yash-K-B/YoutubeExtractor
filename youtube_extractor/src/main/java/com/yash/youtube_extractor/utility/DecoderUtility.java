@@ -1,16 +1,20 @@
 package com.yash.youtube_extractor.utility;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.yash.youtube_extractor.models.Decoder;
 import com.yash.youtube_extractor.models.StreamingData;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class DecoderUtility {
+    private static final String TAG = "DecoderUtility";
 
     private DecoderUtility() {}
 
@@ -33,8 +37,9 @@ public class DecoderUtility {
     public static String decodeThrottle(String url, Decoder decoder) {
         if (decoder == null) return url;
         Uri uri = Uri.parse(url);
-        String parameter = uri.getQueryParameter("n");
+        String parameter = Uri.decode(uri.getQueryParameter("n"));
         String decodedThrottle = decoder.decodeThrottle(parameter);
+        Log.d(TAG, "Parameter : " + parameter + " Decoded Val: " + decodedThrottle);
         return url.replace("&n=" + parameter, "&n=" + decodedThrottle);
     }
 

@@ -81,6 +81,19 @@ public class Extractor {
             JSONObject object = new JSONObject(result);
             StreamingData streamingData = moshi.adapter(StreamingData.class).fromJson(object.getString("streamingData"));
 
+
+            String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
+            Pattern pattern = Pattern.compile(jsUrlPattern);
+            Matcher matcher = pattern.matcher(html);
+            String playerJs;
+            if (matcher.find()) {
+                playerJs = CommonUtility.getHtmlString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
+            } else {
+                throw new ExtractionException("Player JS Not available");
+            }
+
+            StringBuilder functions = new StringBuilder();
+
             int index = result.indexOf("\"signatureCipher\"");
 
             /*
@@ -90,58 +103,50 @@ public class Extractor {
              */
 
             if (index != -1) {
-                String jsUrlPattern = "\"PLAYER_JS_URL\":\"([A-za-z0-9/.]+)\"";
-                Pattern pattern = Pattern.compile(jsUrlPattern);
-                Matcher matcher = pattern.matcher(html);
-                if (matcher.find()) {
-                    StringBuilder functions = new StringBuilder();
-                    String playerJs = CommonUtility.getHtmlString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
-                    Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
-                    Matcher m = decoderFunc.matcher(playerJs);
-                    String auxFuncName = "";
-                    if (m.find()) {
-                        functions.append("var ").append(m.group(0)).append(";");
-                        decodeFunctionName = m.group(1);
-                        auxFuncName = m.group(2);
-                    }
-                    Pattern auxFunc = Pattern.compile("var " + (auxFuncName != null ? auxFuncName.replace("$", "\\$") : "") + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
-                    Matcher auxMatcher = auxFunc.matcher(playerJs);
-                    if (auxMatcher.find()) {
-                        functions.append(auxMatcher.group(0));
-                    }
-                    Pattern throttleFunc = Pattern.compile("[A-Za-z0-9]+\\s*=\\s*[A-Za-z0-9]+\\s*\\.get\\(\"n\"\\)\\)\\s*&&\\s*\\([A-Za-z0-9]\\s*+=\\s*([A-Za-z0-9]+)\\[[0-9]+\\]\\([A-Za-z0-9]+\\),\\s*[A-Za-z0-9]+\\.set\\(\"n\",\\s*b\\),\\s*[A-Za-z0-9.]+\\s*\\|\\|\\s*([A-Za-z0-9]+)\\([A-Za-z0-9\"]+\\)");
-                    Matcher throttleMatcher = throttleFunc.matcher(playerJs);
-                    if (throttleMatcher.find()) {
-                        throttleDecoderFunctionName = throttleMatcher.group(2);
-                        String initKey = String.format("%s=function(a){", throttleDecoderFunctionName);
-                        String throttleDecoderFunction = JsonUtil.extractJsonFromHtmlV3(initKey, playerJs, ResponseFrom.END);
-                        String func = "var " + throttleDecoderFunctionName + "=function(a)" + throttleDecoderFunction + ";";
-                        Log.d(TAG, "Functions = " + func);
-                        functions.append(func);
-                    }
-
-                    context.setOptimizationLevel(-1);
-                    context.evaluateString(scope, functions.toString(), "script", 1, null);
+                Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
+                Matcher m = decoderFunc.matcher(playerJs);
+                String auxFuncName = "";
+                if (m.find()) {
+                    functions.append("var ").append(m.group(0)).append(";");
+                    decodeFunctionName = m.group(1);
+                    auxFuncName = m.group(2);
+                }
+                Pattern auxFunc = Pattern.compile("var " + (auxFuncName != null ? auxFuncName.replace("$", "\\$") : "") + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
+                Matcher auxMatcher = auxFunc.matcher(playerJs);
+                if (auxMatcher.find()) {
+                    functions.append(auxMatcher.group(0));
                 }
             }
 
+            Pattern throttleFunc = Pattern.compile("[A-Za-z0-9]+\\s*=\\s*[A-Za-z0-9]+\\s*\\.get\\(\"n\"\\)\\)\\s*&&\\s*\\([A-Za-z0-9]\\s*+=\\s*([A-Za-z0-9]+)\\[[0-9]+\\]\\([A-Za-z0-9]+\\),\\s*[A-Za-z0-9]+\\.set\\(\"n\",\\s*b\\),\\s*[A-Za-z0-9.]+\\s*\\|\\|\\s*([A-Za-z0-9]+)\\([A-Za-z0-9\"]+\\)");
+            Matcher throttleMatcher = throttleFunc.matcher(playerJs);
+            if (throttleMatcher.find()) {
+                throttleDecoderFunctionName = throttleMatcher.group(2);
+                String initKey = String.format("%s=function(a){", throttleDecoderFunctionName);
+                String throttleDecoderFunction = JsonUtil.extractJsonFromHtmlV3(initKey, playerJs, ResponseFrom.END);
+                String func = "var " + throttleDecoderFunctionName + "=function(a)" + throttleDecoderFunction + ";";
+                Log.d(TAG, "f = " + func);
+                functions.append(func);
+            }
 
-            if (index != -1) {
+            context.setOptimizationLevel(-1);
+            context.evaluateString(scope, functions.toString(), "script", 1, null);
+
+
+            if (index != -1)
                 decoderFunction = (Function) scope.get(decodeFunctionName, scope);
-                throttleFunction = (Function) scope.get(throttleDecoderFunctionName, scope);
-                streamingData.initObject(new Decoder() {
-                    @Override
-                    public String decodeSignature(String signature) {
-                        return (String) decoderFunction.call(context, scope, scope, new Object[]{signature});
-                    }
+            throttleFunction = (Function) scope.get(throttleDecoderFunctionName, scope);
+            streamingData.initObject(new Decoder() {
+                @Override
+                public String decodeSignature(String signature) {
+                    return (String) decoderFunction.call(context, scope, scope, new Object[]{signature});
+                }
 
-                    @Override
-                    public String decodeThrottle(String throttle) {
-                        return (String) throttleFunction.call(context, scope, scope, new Object[]{throttle});
-                    }
-
-                });
-            } else streamingData.initObject(null);
+                @Override
+                public String decodeThrottle(String throttle) {
+                    return (String) throttleFunction.call(context, scope, scope, new Object[]{throttle});
+                }
+            });
 
             VideoData videoData = moshi.adapter(VideoData.class).fromJson(object.getString("videoDetails"));
             videoData.setChannelThumbnail(channelThumbnail);
@@ -150,7 +155,8 @@ public class Extractor {
             Log.d("YOUTUBE_EXTRACTOR", "extract : " + ConverterUtil.formatDuration(end - start));
             return new VideoDetails(streamingData, videoData);
 
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             throw new ExtractionException(e.toString());
         }
     }
@@ -188,7 +194,6 @@ public class Extractor {
         }
         return builder.toString();
     }
-
 
 
     public interface Callback {
