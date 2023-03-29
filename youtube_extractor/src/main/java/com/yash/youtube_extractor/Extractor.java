@@ -8,8 +8,10 @@ import android.util.Log;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.yash.youtube_extractor.constants.ResponseFrom;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.ChannelThumbnail;
+import com.yash.youtube_extractor.models.Decoder;
 import com.yash.youtube_extractor.models.StreamingData;
 import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
@@ -40,6 +42,7 @@ public class Extractor {
     Context context;
     ScriptableObject scope;
     Function decoderFunction;
+    Function throttleFunction;
     Handler handler;
 
     public Extractor() {
@@ -53,6 +56,7 @@ public class Extractor {
             start = SystemClock.currentThreadTimeMillis();
             String html = CommonUtility.getHtmlString(url);
             String decodeFunctionName = "";
+            String throttleDecoderFunctionName = "";
             context = Context.enter();
             scope = context.initStandardObjects();
             int stIndex = html.indexOf("\"player_response\":\"{");
@@ -105,6 +109,17 @@ public class Extractor {
                     if (auxMatcher.find()) {
                         functions.append(auxMatcher.group(0));
                     }
+                    Pattern throttleFunc = Pattern.compile("[A-Za-z0-9]+\\s*=\\s*[A-Za-z0-9]+\\s*\\.get\\(\"n\"\\)\\)\\s*&&\\s*\\([A-Za-z0-9]\\s*+=\\s*([A-Za-z0-9]+)\\[[0-9]+\\]\\([A-Za-z0-9]+\\),\\s*[A-Za-z0-9]+\\.set\\(\"n\",\\s*b\\),\\s*[A-Za-z0-9.]+\\s*\\|\\|\\s*([A-Za-z0-9]+)\\([A-Za-z0-9\"]+\\)");
+                    Matcher throttleMatcher = throttleFunc.matcher(playerJs);
+                    if (throttleMatcher.find()) {
+                        throttleDecoderFunctionName = throttleMatcher.group(2);
+                        String initKey = String.format("%s=function(a){", throttleDecoderFunctionName);
+                        String throttleDecoderFunction = JsonUtil.extractJsonFromHtmlV3(initKey, playerJs, ResponseFrom.END);
+                        String func = "var " + throttleDecoderFunctionName + "=function(a)" + throttleDecoderFunction + ";";
+                        Log.d(TAG, "Functions = " + func);
+                        functions.append(func);
+                    }
+
                     context.setOptimizationLevel(-1);
                     context.evaluateString(scope, functions.toString(), "script", 1, null);
                 }
@@ -113,11 +128,18 @@ public class Extractor {
 
             if (index != -1) {
                 decoderFunction = (Function) scope.get(decodeFunctionName, scope);
-                streamingData.initObject(new StreamingData.Decoder() {
+                throttleFunction = (Function) scope.get(throttleDecoderFunctionName, scope);
+                streamingData.initObject(new Decoder() {
                     @Override
-                    public String decode(String signature) {
+                    public String decodeSignature(String signature) {
                         return (String) decoderFunction.call(context, scope, scope, new Object[]{signature});
                     }
+
+                    @Override
+                    public String decodeThrottle(String throttle) {
+                        return (String) throttleFunction.call(context, scope, scope, new Object[]{throttle});
+                    }
+
                 });
             } else streamingData.initObject(null);
 

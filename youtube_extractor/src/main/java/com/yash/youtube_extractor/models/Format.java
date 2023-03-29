@@ -2,6 +2,7 @@ package com.yash.youtube_extractor.models;
 
 
 import com.squareup.moshi.Json;
+import com.yash.youtube_extractor.utility.DecoderUtility;
 
 public class Format {
 
@@ -207,10 +208,8 @@ public class Format {
         this.url = url;
     }
 
-    public void decoder(StreamingData.Decoder decoder) {
-        if (this.signatureCipher != null && decoder != null) {
-            this.url = (StreamingData.cipherDecoder(this.signatureCipher, decoder));
-        }
+    public void decoder(Decoder decoder) {
+        this.url = DecoderUtility.getUrl(this.url, this.signatureCipher, decoder);
     }
 
     @Override

@@ -60,4 +60,39 @@ public class JsonUtil {
         }
         return builder.toString();
     }
+
+
+    public static String extractJsonFromHtmlV3(String initial, String html, ResponseFrom responseFrom) {
+        int stIndex = html.indexOf(initial);
+        StringBuilder builder = new StringBuilder();
+        if (stIndex == -1) return builder.toString();
+        char ch;
+        char startChar = responseFrom == ResponseFrom.START ? initial.charAt(0) : initial.charAt(initial.length() - 1);
+        Character endCharacter = endCharacterMap.get(startChar);
+        char endChar = endCharacter == null ? startChar : endCharacter;
+        int counter = 0;
+        boolean dQuoteStarted = false;
+        boolean sQuoteStarted = false;
+        for (int st = stIndex + initial.length() - 1; st < html.length(); st++) {
+            ch = html.charAt(st);
+            builder.append(ch);
+            if(ch == '"' && !sQuoteStarted) {
+                dQuoteStarted = !dQuoteStarted;
+            }
+
+            if(ch == '\'' && !dQuoteStarted) {
+                sQuoteStarted = !sQuoteStarted;
+            }
+
+            if (ch == startChar && !(dQuoteStarted || sQuoteStarted)) {
+                counter++;
+                continue;
+            }
+            if (ch == endChar && !(dQuoteStarted || sQuoteStarted)) {
+                counter--;
+                if (counter == 0) break;
+            }
+        }
+        return builder.toString();
+    }
 }

@@ -5,6 +5,7 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 
 import com.squareup.moshi.Json;
+import com.yash.youtube_extractor.utility.DecoderUtility;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -191,7 +192,7 @@ public class StreamingData implements Serializable {
             this.audioSampleRate = format.getAudioSampleRate();
             this.audioChannels = format.getAudioChannels();
             this.loudnessDb = format.getLoudnessDb();
-            this.url = format.getUrl() == null ? StreamingData.cipherDecoder(format.getSignatureCipher(), decoder) : format.getUrl();
+            this.url = DecoderUtility.getUrl(format.getUrl(), format.getSignatureCipher(), decoder);
         }
 
         @Json(name="itag")
@@ -412,7 +413,7 @@ public class StreamingData implements Serializable {
             this.projectionType = format.getProjectionType();
             this.averageBitrate = format.getAverageBitrate();
             this.approxDurationMs = format.getApproxDurationMs();
-            this.url = format.getUrl() == null ? StreamingData.cipherDecoder(format.getSignatureCipher(), decoder) : format.getUrl();
+            this.url = DecoderUtility.getUrl(format.getUrl(), format.getSignatureCipher(), decoder);
         }
 
         @Json(name="itag")
@@ -614,22 +615,6 @@ public class StreamingData implements Serializable {
         isFormatInitialized = true;
     }
 
-    public static String cipherDecoder(String encodedCipher, Decoder decoder) {
-        if (decoder == null) return "";
-        Map<String, String> queryParams = new HashMap<>();
-        for (String param : encodedCipher.split("&", 3)) {
-            String[] splits = param.split("=", 2);
-            queryParams.put(splits[0], splits.length > 1 ? splits[splits.length - 1] : "");
-        }
-        String encodedUrl = queryParams.get("url");
-        if(encodedUrl == null)
-            return null;
-        String url = Uri.decode(encodedUrl.replace("\\/", "/"));
-        String paramKey = Uri.decode(queryParams.get("sp"));
-        String signature = Uri.decode(queryParams.get("s"));
-        return String.format(Locale.US, "%s&%s=%s", url, paramKey, Uri.encode(decoder.decode(signature)));
-    }
-
 
     //regex player js = /s/player/([A-za-z0-9_]+)/player_ias.vflset/en_US/base.js
 
@@ -692,7 +677,4 @@ public class StreamingData implements Serializable {
                 builder.toString();
     }
 
-    public interface Decoder {
-        public String decode(String signature);
-    }
 }
