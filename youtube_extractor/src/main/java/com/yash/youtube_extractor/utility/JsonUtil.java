@@ -95,4 +95,32 @@ public class JsonUtil {
         }
         return builder.toString();
     }
+
+
+    public static String extractJsonFromHtmlV2(String initial, String html, ResponseFrom responseFrom, int offset) {
+        StringBuilder builder = new StringBuilder();
+        if(initial.length()<offset)
+            return builder.toString();
+        int stIndex = html.indexOf(initial);
+        if (stIndex == -1) return builder.toString();
+        char ch;
+        char startChar = responseFrom == ResponseFrom.START ? initial.charAt(offset) : initial.charAt(initial.length() - offset - 1);
+        stIndex += offset;
+        Character endCharacter = endCharacterMap.get(startChar);
+        char endChar = endCharacter == null ? startChar : endCharacter;
+        int counter = 0;
+        for (int st = stIndex; st < html.length(); st++) {
+            ch = html.charAt(st);
+            builder.append(ch);
+            if (ch == startChar) {
+                counter++;
+                continue;
+            }
+            if (ch == endChar) {
+                counter--;
+                if (counter == 0) break;
+            }
+        }
+        return builder.toString();
+    }
 }

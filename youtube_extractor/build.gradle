@@ -1,4 +1,12 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+    id 'io.franzbecker.gradle-lombok' version '5.0.0'
+}
+
+lombok {
+    version = "1.18.24"
+    sha256 = ""
+}
 
 android {
     compileSdkVersion 33
@@ -26,16 +34,20 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    implementation 'org.jsoup:jsoup:1.13.1'
 
-    implementation 'com.squareup.moshi:moshi:1.13.0'
+    implementation 'com.squareup.moshi:moshi:1.14.0'
 
-    implementation 'org.mozilla:rhino:1.7.10'
+    implementation 'org.mozilla:rhino:1.7.14'
+
+    implementation 'commons-lang:commons-lang:2.6'
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
+
 }

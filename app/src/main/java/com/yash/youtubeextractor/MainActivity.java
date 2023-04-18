@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -16,13 +17,13 @@ import com.yash.logging.LogHelper;
 import com.yash.youtube_extractor.Extractor;
 import com.yash.youtube_extractor.ExtractorHelper;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
+import com.yash.youtube_extractor.models.YoutubeResponse;
 import com.yash.youtube_extractor.models.VideoDetails;
-import com.yash.youtube_extractor.models.YoutubeSong;
 import com.yash.youtubeextractor.adapters.PlaylistItemAdapter;
 import com.yash.youtubeextractor.adapters.StreamsAdapter;
 import com.yash.youtubeextractor.databinding.ActivityMainBinding;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,13 +59,20 @@ public class MainActivity extends AppCompatActivity {
             String id = parts[parts.length - 1];
             if (stringUrl.contains("playlist")) {
                 executorService.execute(() -> {
-                    List<YoutubeSong> songs = ExtractorHelper.playlistSongs(id);
+                    YoutubeResponse youtubeResponse = ExtractorHelper.playlistSongs(id);
                     handler.post(() -> {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        PlaylistItemAdapter adapter = new PlaylistItemAdapter(MainActivity.this, songs);
+                        PlaylistItemAdapter adapter = new PlaylistItemAdapter(MainActivity.this, youtubeResponse.getSongs());
                         mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
                         mainBinding.container.setAdapter(adapter);
                     });
+                    YoutubeResponse youtubeResponse1 = null;
+                    try {
+                        youtubeResponse1 = ExtractorHelper.continuationResponse(youtubeResponse.getContinuationToken(), youtubeResponse.getContinuationType());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Log.i(TAG, "onCreate: "+ youtubeResponse1);
                 });
             } else {
                 final Extractor extractor = new Extractor();

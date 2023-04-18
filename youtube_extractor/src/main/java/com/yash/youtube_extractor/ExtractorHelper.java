@@ -6,7 +6,9 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import com.yash.youtube_extractor.constants.Constants;
+import com.yash.youtube_extractor.constants.ContinuationType;
 import com.yash.youtube_extractor.constants.ResponseFrom;
+import com.yash.youtube_extractor.models.YoutubeResponse;
 import com.yash.youtube_extractor.models.YoutubePlaylist;
 import com.yash.youtube_extractor.models.YoutubeSong;
 import com.yash.youtube_extractor.pojo.channel.ChannelItem;
@@ -19,6 +21,8 @@ import com.yash.youtube_extractor.pojo.channel.RunsItem;
 import com.yash.youtube_extractor.pojo.channel.ShelfRenderer;
 import com.yash.youtube_extractor.pojo.channel.Title;
 import com.yash.youtube_extractor.pojo.common.ThumbnailsItem;
+import com.yash.youtube_extractor.pojo.playlist.ContinuationCommand;
+import com.yash.youtube_extractor.pojo.playlist.ContinuationItemRenderer;
 import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoItem;
 import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoRenderer;
 import com.yash.youtube_extractor.pojo.search.ItemSelectionContentsItem;
@@ -28,8 +32,13 @@ import com.yash.youtube_extractor.pojo.search.SelectionListContentsItem;
 import com.yash.youtube_extractor.pojo.search.VideoRenderer;
 import com.yash.youtube_extractor.utility.CollectionUtility;
 import com.yash.youtube_extractor.utility.CommonUtility;
+import com.yash.youtube_extractor.utility.HttpUtility;
 import com.yash.youtube_extractor.utility.JsonUtil;
+import com.yash.youtube_extractor.utility.RequestUtility;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -126,24 +135,55 @@ public class ExtractorHelper {
      * @param playlistId ID of the PLaylist
      * @return List of youtube songs
      */
-    public static List<YoutubeSong> playlistSongs(String playlistId) {
+    public static YoutubeResponse playlistSongs(String playlistId) {
         String url = String.format(Constants.PLAYLIST_URL_PLACEHOLDER, playlistId);
         String playlistHtml = CommonUtility.getHtmlString(url);
 
+        return extractPlaylistSongs(playlistHtml, "playlistVideoListRenderer\":{\"contents\":[");
+    }
+
+    public static YoutubeResponse continuationResponse(String continuation, ContinuationType continuationType) throws IOException {
+      switch (continuationType) {
+          case BROWSE:
+              return browse(continuation);
+
+          case NEXT:
+              return next(continuation);
+      }
+      return YoutubeResponse.empty();
+    }
+
+    private static YoutubeResponse browse(String continuation) throws IOException {
+        String jsonString = HttpUtility.getInstance().post("https://youtubei.googleapis.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", RequestUtility.buildContinuationRequest(continuation).toString());
+        return extractPlaylistSongs(jsonString, "appendContinuationItemsAction\":{\"continuationItems\":[");
+    }
+
+    public static YoutubeResponse next(String continuation) throws IOException {
+        String htmlString = HttpUtility.getInstance().post("https://youtubei.googleapis.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", RequestUtility.buildContinuationRequest(continuation).toString());
+        return extractPlaylistSongs(htmlString, "playlistVideoListRenderer\":{\"contents\":[");
+    }
+
+    private static YoutubeResponse extractPlaylistSongs(String playlistHtml, String initialSearchText) {
         List<YoutubeSong> songs = new ArrayList<>();
 
-        String playListJson = JsonUtil.extractJsonFromHtmlV2("playlistVideoListRenderer\":{\"contents\":[", playlistHtml, ResponseFrom.END);
+        ContinuationCommand continuationCommand = new ContinuationCommand();
+        String playListJson = JsonUtil.extractJsonFromHtmlV2(initialSearchText, playlistHtml, ResponseFrom.END);
         try {
             JsonAdapter<List<PlaylistVideoItem>> adapter = moshi.adapter(Types.newParameterizedType(List.class, PlaylistVideoItem.class));
             List<PlaylistVideoItem> playlistVideoItems = adapter.fromJson(playListJson);
             if (CollectionUtility.isEmpty(playlistVideoItems)) {
-                return songs;
+                return new YoutubeResponse(songs, continuationCommand.getToken(), continuationCommand.getRequest());
             }
 
             for (PlaylistVideoItem playlistVideoItem : playlistVideoItems) {
                 PlaylistVideoRenderer videoRenderer = playlistVideoItem.getPlaylistVideoRenderer();
-                if (videoRenderer == null)
+                if (videoRenderer == null) {
+                    ContinuationItemRenderer continuationItemRenderer = playlistVideoItem.getContinuationItemRenderer();
+                    if(continuationItemRenderer != null) {
+                        continuationCommand = continuationItemRenderer.getContinuationEndpoint().getContinuationCommand();
+                    }
                     continue;
+                }
                 YoutubeSong youtubeSong = new YoutubeSong();
                 youtubeSong.setVideoId(videoRenderer.getVideoId());
                 String videoTitle = CollectionUtility.isEmpty(videoRenderer.getTitle().getRuns()) ? "Unknown" : videoRenderer.getTitle().getRuns().get(0).getText();
@@ -166,7 +206,7 @@ public class ExtractorHelper {
             Log.e(TAG, "Error while fetching playlist songs : " + e);
         }
 
-        return songs;
+        return new YoutubeResponse(songs, continuationCommand.getToken(), continuationCommand.getRequest());
     }
 
     public static Map<String, List<YoutubePlaylist>> channelPlaylists(String channelId) {
@@ -240,5 +280,26 @@ public class ExtractorHelper {
         }
 
         return youtubePlaylistMap;
+    }
+
+    public static void contentFromYoutubeMusic() {
+        try {
+            String url = "https://music.youtube.com";
+            String playlistHtml = CommonUtility.getHtmlUnescapedString(url);
+
+            String data = JsonUtil.extractJsonFromHtmlV2("initialData.push({path: '\\/browse'", playlistHtml, ResponseFrom.START, 17);
+            String dataIdentifier = "data: '";
+            if (data.length() > dataIdentifier.length()) {
+                String jsonPayload = data.substring(data.indexOf(dataIdentifier) + dataIdentifier.length(), data.length() - 2);
+                String s = StringEscapeUtils.unescapeJava(jsonPayload.replace("\\x", "\\u00"));
+                Log.d(TAG, s);
+            }
+
+            Log.d(TAG, playlistHtml);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Exception :", e);
+        }
+
     }
 }
