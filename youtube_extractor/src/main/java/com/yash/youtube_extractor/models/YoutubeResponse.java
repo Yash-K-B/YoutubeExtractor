@@ -2,6 +2,8 @@ package com.yash.youtube_extractor.models;
 
 import com.yash.youtube_extractor.constants.ContinuationType;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +23,10 @@ public class YoutubeResponse {
     public YoutubeResponse(List<YoutubeSong> songs, String continuationToken, String continuationType) {
         this.songs = songs;
         this.continuationToken = continuationToken;
-        this.continuationType = continuationType.contains("BROWSE") ? ContinuationType.BROWSE : ContinuationType.NEXT;
+        this.continuationType = StringUtils.isNotBlank(continuationType) && continuationType.contains("BROWSE") ? ContinuationType.BROWSE : ContinuationType.NEXT;
     }
 
     public static YoutubeResponse empty() {
-        return new YoutubeResponse(new ArrayList<>(), null, "");
+        return new YoutubeResponse(new ArrayList<>(), null, null);
     }
 }
