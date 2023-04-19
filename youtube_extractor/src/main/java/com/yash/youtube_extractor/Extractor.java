@@ -120,13 +120,16 @@ public class Extractor {
 
             Pattern throttleFunc = Pattern.compile("[A-Za-z0-9]+\\s*=\\s*[A-Za-z0-9]+\\s*\\.get\\(\"n\"\\)\\)\\s*&&\\s*\\([A-Za-z0-9]\\s*+=\\s*([A-Za-z0-9]+)\\[[0-9]+\\]\\([A-Za-z0-9]+\\),\\s*[A-Za-z0-9]+\\.set\\(\"n\",\\s*b\\),\\s*[A-Za-z0-9.]+\\s*\\|\\|\\s*([A-Za-z0-9]+)\\([A-Za-z0-9\"]+\\)");
             Matcher throttleMatcher = throttleFunc.matcher(playerJs);
+            boolean throttleFunctionAvailable = false;
             if (throttleMatcher.find()) {
                 throttleDecoderFunctionName = throttleMatcher.group(2);
-                String initKey = String.format("%s=function(a){", throttleDecoderFunctionName);
-                String throttleDecoderFunction = JsonUtil.extractJsonFromHtmlV3(initKey, playerJs, ResponseFrom.END);
-                String func = "var " + throttleDecoderFunctionName + "=function(a)" + throttleDecoderFunction + ";";
-                Log.d(TAG, "f = " + func);
-                functions.append(func);
+                Pattern throttleFuncPattern = Pattern.compile(throttleDecoderFunctionName + "=function\\(a\\)\\{(.*\n*){0,30}b\\.join\\(\"\"\\)\\};");
+                Matcher throttleFuncPatternMatcher = throttleFuncPattern.matcher(playerJs);
+                if (throttleFuncPatternMatcher.find()) {
+                    String func = "var " + throttleFuncPatternMatcher.group(0);
+                    functions.append(func);
+                    throttleFunctionAvailable = true;
+                }
             }
 
             context.setOptimizationLevel(-1);
@@ -135,7 +138,8 @@ public class Extractor {
 
             if (index != -1)
                 decoderFunction = (Function) scope.get(decodeFunctionName, scope);
-            throttleFunction = (Function) scope.get(throttleDecoderFunctionName, scope);
+            if (throttleFunctionAvailable)
+                throttleFunction = (Function) scope.get(throttleDecoderFunctionName, scope);
             streamingData.initObject(new Decoder() {
                 @Override
                 public String decodeSignature(String signature) {
@@ -144,6 +148,8 @@ public class Extractor {
 
                 @Override
                 public String decodeThrottle(String throttle) {
+                    if(throttleFunction == null)
+                        return throttle;
                     return (String) throttleFunction.call(context, scope, scope, new Object[]{throttle});
                 }
             });

@@ -39,7 +39,7 @@ public class DecoderUtility {
         Uri uri = Uri.parse(url);
         String parameter = Uri.decode(uri.getQueryParameter("n"));
         String decodedThrottle = decoder.decodeThrottle(parameter);
-        Log.d(TAG, "Parameter : " + parameter + " Decoded Val: " + decodedThrottle);
+        Log.d(TAG, "Parameter : " + parameter + " Decoded Val: " + decodedThrottle + " : mime : " + uri.getQueryParameter("mime"));
         return url.replace("&n=" + parameter, "&n=" + decodedThrottle);
     }
 

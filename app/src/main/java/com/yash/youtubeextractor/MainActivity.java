@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(ExtractionException e) {
-                            LogHelper.d(TAG, "onError: " + e.getLocalizedMessage());
+                            LogHelper.e(TAG, "onError: ", e);
                             Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void refresh(String url) {
-        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=SdtZGpisDZs" : url);
+        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=B7OUHcz2tEw" : url);
         mainBinding.container.setLayoutManager(new LinearLayoutManager(this));
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
