@@ -19,6 +19,7 @@ import com.yash.youtube_extractor.utility.CommonUtility;
 import com.yash.youtube_extractor.utility.ConverterUtil;
 import com.yash.youtube_extractor.utility.JsonUtil;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -32,13 +33,16 @@ import java.net.URL;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Extractor {
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final String TAG = "Extractor";
-    public static final String BASE_URL = "https://www.youtube.com/watch?v=";
+    public static final String BASE_URL = "https://m.youtube.com/watch?v=";
     Context context;
     ScriptableObject scope;
     Function decoderFunction;
@@ -52,9 +56,17 @@ public class Extractor {
     public VideoDetails extract(String videoId) throws ExtractionException {
         String url = BASE_URL + videoId;
         try {
-            long start, end;
-            start = SystemClock.currentThreadTimeMillis();
+            long start, end, intermediate;
+            Log.d("YOUTUBE_EXTRACTOR", "Starting extraction of video id - " + videoId);
+            intermediate = start = SystemClock.currentThreadTimeMillis();
             String html = CommonUtility.getHtmlString(url);
+
+
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "HTML downloaded in : " + ConverterUtil.formatDuration(end - intermediate));
+            if(StringUtils.isBlank(html))
+                throw new ExtractionException("Unable to retrieve metadata");
+
             String decodeFunctionName = "";
             String throttleDecoderFunctionName = "";
             context = Context.enter();
@@ -91,6 +103,9 @@ public class Extractor {
             } else {
                 throw new ExtractionException("Player JS Not available");
             }
+            intermediate = end;
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "Player Script downloaded in : " + ConverterUtil.formatDuration(end - intermediate));
 
             StringBuilder functions = new StringBuilder();
 
@@ -118,19 +133,34 @@ public class Extractor {
                 }
             }
 
+            intermediate = end;
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "Cipher decoder function found in : " + ConverterUtil.formatDuration(end - intermediate));
+
+
             Pattern throttleFunc = Pattern.compile("[A-Za-z0-9]+\\s*=\\s*[A-Za-z0-9]+\\s*\\.get\\(\"n\"\\)\\)\\s*&&\\s*\\([A-Za-z0-9]\\s*+=\\s*([A-Za-z0-9]+)\\[[0-9]+\\]\\([A-Za-z0-9]+\\),\\s*[A-Za-z0-9]+\\.set\\(\"n\",\\s*b\\),\\s*[A-Za-z0-9.]+\\s*\\|\\|\\s*([A-Za-z0-9]+)\\([A-Za-z0-9\"]+\\)");
             Matcher throttleMatcher = throttleFunc.matcher(playerJs);
             boolean throttleFunctionAvailable = false;
             if (throttleMatcher.find()) {
                 throttleDecoderFunctionName = throttleMatcher.group(2);
-                Pattern throttleFuncPattern = Pattern.compile(throttleDecoderFunctionName + "=function\\(a\\)\\{(.*\n*){0,30}b\\.join\\(\"\"\\)\\};");
-                Matcher throttleFuncPatternMatcher = throttleFuncPattern.matcher(playerJs);
-                if (throttleFuncPatternMatcher.find()) {
-                    String func = "var " + throttleFuncPatternMatcher.group(0);
-                    functions.append(func);
-                    throttleFunctionAvailable = true;
-                }
+
+                intermediate = end;
+                end = SystemClock.currentThreadTimeMillis();
+                Log.d("YOUTUBE_EXTRACTOR", "Throttle function name found in : " + ConverterUtil.formatDuration(end - intermediate));
+
+
+                String initKey = String.format("%s=function(a){", throttleDecoderFunctionName);
+                String throttleDecoderFunction = JsonUtil.extractJsFunctionFromHtmlJs(initKey, playerJs, ResponseFrom.END);
+                String func = "var " + throttleDecoderFunctionName + "=function(a)" + throttleDecoderFunction + ";";
+                Log.d(TAG, "f = " + func);
+                functions.append(func);
+                throttleFunctionAvailable = true;
             }
+
+            intermediate = end;
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "Throttle function found in : " + ConverterUtil.formatDuration(end - intermediate));
+
 
             context.setOptimizationLevel(-1);
             context.evaluateString(scope, functions.toString(), "script", 1, null);
@@ -148,11 +178,16 @@ public class Extractor {
 
                 @Override
                 public String decodeThrottle(String throttle) {
-                    if(throttleFunction == null)
+                    if(throttleFunction == null || throttle == null)
                         return throttle;
                     return (String) throttleFunction.call(context, scope, scope, new Object[]{throttle});
                 }
             });
+
+            intermediate = end;
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "Links build in : " + ConverterUtil.formatDuration(end - intermediate));
+
 
             VideoData videoData = moshi.adapter(VideoData.class).fromJson(object.getString("videoDetails"));
             videoData.setChannelThumbnail(channelThumbnail);
@@ -161,14 +196,14 @@ public class Extractor {
             Log.d("YOUTUBE_EXTRACTOR", "extract : " + ConverterUtil.formatDuration(end - start));
             return new VideoDetails(streamingData, videoData);
 
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
+            Log.e(TAG, "Error in extraction :", e);
             throw new ExtractionException(e.toString());
         }
     }
 
     public void extract(String videoId, Callback callback) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        executorService.execute(() -> {
             try {
                 VideoDetails videoDetails = extract(videoId);
                 handler.post(() -> callback.onSuccess(videoDetails));

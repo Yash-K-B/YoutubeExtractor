@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(TAG, "onCreate: "+ youtubeResponse1);
                 });
             } else {
+                LogHelper.d(TAG, "onCreate: Starting extraction of %s", id);
                 final Extractor extractor = new Extractor();
                 try {
                     extractor.extract(id, new Extractor.Callback() {
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } catch (ExtractionException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "onCreate: ", e);
                 }
 
             }
