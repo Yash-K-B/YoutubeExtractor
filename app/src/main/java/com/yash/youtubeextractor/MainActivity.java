@@ -77,25 +77,21 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 LogHelper.d(TAG, "onCreate: Starting extraction of %s", id);
                 final Extractor extractor = new Extractor();
-                try {
-                    extractor.extract(id, new Extractor.Callback() {
-                        @Override
-                        public void onSuccess(VideoDetails videoDetails) {
-                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                            StreamsAdapter adapter = new StreamsAdapter(MainActivity.this, new StreamsAdapter.MyData(videoDetails.getStreamingData()));
-                            mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
-                            mainBinding.container.setAdapter(adapter);
-                        }
+                extractor.extract(id, new Extractor.Callback() {
+                    @Override
+                    public void onSuccess(VideoDetails videoDetails) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        StreamsAdapter adapter = new StreamsAdapter(MainActivity.this, new StreamsAdapter.MyData(videoDetails.getStreamingData()));
+                        mainBinding.container.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+                        mainBinding.container.setAdapter(adapter);
+                    }
 
-                        @Override
-                        public void onError(ExtractionException e) {
-                            LogHelper.e(TAG, "onError: ", e);
-                            Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } catch (ExtractionException e) {
-                    Log.e(TAG, "onCreate: ", e);
-                }
+                    @Override
+                    public void onError(ExtractionException e) {
+                        LogHelper.e(TAG, "onError: ", e);
+                        Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
             }
 
@@ -123,6 +119,16 @@ public class MainActivity extends AppCompatActivity {
 
         mainBinding.testChannel.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ChannelTestActivity.class);
+            startActivity(intent);
+        });
+
+        mainBinding.testSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, TestSearchActivity.class);
+            startActivity(intent);
+        });
+
+        mainBinding.testWatchNext.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, TestWatchNextActivity.class);
             startActivity(intent);
         });
 

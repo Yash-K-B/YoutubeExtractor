@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".TestWatchNextActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TestSearchActivity"
+            android:exported="false" />
+        <activity
             android:name=".ChannelTestActivity"
             android:exported="false" />
         <activity

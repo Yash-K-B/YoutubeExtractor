@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'io.franzbecker.gradle-lombok' version '5.0.0'
 }
+apply plugin: 'kotlin-android'
 
 lombok {
     version = "1.18.24"
@@ -40,6 +41,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'com.squareup.moshi:moshi:1.14.0'
+    implementation 'com.squareup.moshi:moshi-kotlin:1.14.0'
 
     implementation 'org.mozilla:rhino:1.7.14'
 

@@ -5,9 +5,11 @@ import android.util.Log;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory;
 import com.yash.youtube_extractor.constants.Constants;
 import com.yash.youtube_extractor.constants.ContinuationType;
 import com.yash.youtube_extractor.constants.ResponseFrom;
+import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.YoutubeResponse;
 import com.yash.youtube_extractor.models.YoutubePlaylist;
 import com.yash.youtube_extractor.models.YoutubeSong;
@@ -21,6 +23,8 @@ import com.yash.youtube_extractor.pojo.channel.RunsItem;
 import com.yash.youtube_extractor.pojo.channel.ShelfRenderer;
 import com.yash.youtube_extractor.pojo.channel.Title;
 import com.yash.youtube_extractor.pojo.common.ThumbnailsItem;
+import com.yash.youtube_extractor.pojo.next.CompactVideoRenderer;
+import com.yash.youtube_extractor.pojo.next.WatchNextContinuationItem;
 import com.yash.youtube_extractor.pojo.playlist.ContinuationCommand;
 import com.yash.youtube_extractor.pojo.playlist.ContinuationItemRenderer;
 import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoItem;
@@ -28,6 +32,7 @@ import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoRenderer;
 import com.yash.youtube_extractor.pojo.search.ItemSelectionContentsItem;
 import com.yash.youtube_extractor.pojo.search.ItemsItem;
 import com.yash.youtube_extractor.pojo.search.SearchResponse;
+import com.yash.youtube_extractor.pojo.search.SectionListRenderer;
 import com.yash.youtube_extractor.pojo.search.SelectionListContentsItem;
 import com.yash.youtube_extractor.pojo.search.VideoRenderer;
 import com.yash.youtube_extractor.utility.CollectionUtility;
@@ -37,19 +42,26 @@ import com.yash.youtube_extractor.utility.JsonUtil;
 import com.yash.youtube_extractor.utility.RequestUtility;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class ExtractorHelper {
     private static final String TAG = "ExtractorHelper";
 
     public static final Moshi moshi = new Moshi.Builder().build();
+    public static final Moshi moshiKotlin = new Moshi.Builder().add(new KotlinJsonAdapterFactory()).build();
 
     /**
      * Search a string
@@ -57,18 +69,52 @@ public class ExtractorHelper {
      * @param query Query string
      * @return List of youtube songs
      */
-    public static List<YoutubeSong> search(String query) {
-        query = query.replace(" ", "+");
-        String searchHtml = CommonUtility.getHtmlString(String.format(Constants.SEARCH_URL_FORMAT, query));
+    public static YoutubeResponse search(String query) throws ExtractionException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("query", query);
+        payload.put("context", RequestUtility.buildContext());
+        return extractSearchSongs(new JSONObject(payload), "\"twoColumnSearchResultsRenderer\":{", Arrays.asList("primaryContents", "sectionListRenderer", "contents"));
+    }
 
-        String searchResultJson = JsonUtil.extractJsonFromHtml("\"twoColumnSearchResultsRenderer\":{", searchHtml);
+    public static YoutubeResponse searchContinuation(String query, String continuation) throws ExtractionException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("continuation", continuation);
+        payload.put("context", RequestUtility.buildContext());
+        return extractSearchSongs(new JSONObject(payload), "\"appendContinuationItemsAction\":{", Collections.singletonList("continuationItems"));
+    }
 
-        List<YoutubeSong> youtubeSongs = new ArrayList<>();
+    /**
+     * Extract songs from search result
+     *
+     * @param payload           Search request
+     * @param initialSearchText Text to search from response
+     * @param preKeys           keys to extract from searched JSON object
+     * @return Response of songs with continuation token
+     */
+    private static YoutubeResponse extractSearchSongs(JSONObject payload, String initialSearchText, List<String> preKeys) throws ExtractionException {
         try {
-            SearchResponse response = moshi.adapter(SearchResponse.class).fromJson(searchResultJson);
-            if (response == null || response.getPrimaryContents() == null || response.getPrimaryContents().getSectionListRenderer() == null || response.getPrimaryContents().getSectionListRenderer().getContents() == null)
-                return null;
-            for (SelectionListContentsItem item : response.getPrimaryContents().getSectionListRenderer().getContents()) {
+            List<YoutubeSong> youtubeSongs = new ArrayList<>();
+            ContinuationCommand continuationCommand = new ContinuationCommand();
+            String searchHtml = HttpUtility.getInstance().post(RequestUtility.getSearchUrl(), payload.toString());
+            String searchResultJson = JsonUtil.extractJsonFromHtml(initialSearchText, searchHtml);
+            JSONObject response = new JSONObject(searchResultJson);
+            JSONArray finalResponse = null;
+            for (int i = 0; i < preKeys.size(); i++) {
+                if (i == preKeys.size() - 1) {
+                    finalResponse = response.getJSONArray(preKeys.get(i));
+                } else {
+                    if (response.has(preKeys.get(i)))
+                        response = response.getJSONObject(preKeys.get(i));
+                    else return YoutubeResponse.empty();
+                }
+            }
+            if (finalResponse == null)
+                return YoutubeResponse.empty();
+            JsonAdapter<List<SelectionListContentsItem>> adapter = moshi.adapter(Types.newParameterizedType(List.class, SelectionListContentsItem.class));
+            List<SelectionListContentsItem> sectionListRendererItems = adapter.fromJson(finalResponse.toString());
+            if (sectionListRendererItems == null)
+                return YoutubeResponse.empty();
+            for (SelectionListContentsItem item : sectionListRendererItems) {
                 if (item.getItemSectionRenderer() != null && item.getItemSectionRenderer().getContents() != null) {
                     for (ItemSelectionContentsItem video : item.getItemSectionRenderer().getContents()) {
                         if (video.getVideoRenderer() != null) {
@@ -120,13 +166,14 @@ public class ExtractorHelper {
                         }
                     }
 
+                } else if (item.getContinuationItemRenderer() != null) {
+                    continuationCommand = item.getContinuationItemRenderer().getContinuationEndpoint().getContinuationCommand();
                 }
             }
-
+            return new YoutubeResponse(youtubeSongs, continuationCommand.getToken(), continuationCommand.getRequest());
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ExtractionException("Error while extracting songs from watch next", e);
         }
-        return youtubeSongs;
     }
 
     /**
@@ -142,24 +189,32 @@ public class ExtractorHelper {
         return extractPlaylistSongs(playlistHtml, "playlistVideoListRenderer\":{\"contents\":[");
     }
 
+    /**
+     * Playlist songs continuation
+     *
+     * @param continuation     Continuation token
+     * @param continuationType Continuation type
+     * @return Paged Response
+     * @throws IOException I/O Exception
+     */
     public static YoutubeResponse continuationResponse(String continuation, ContinuationType continuationType) throws IOException {
-      switch (continuationType) {
-          case BROWSE:
-              return browse(continuation);
+        switch (continuationType) {
+            case BROWSE:
+                return browse(continuation);
 
-          case NEXT:
-              return next(continuation);
-      }
-      return YoutubeResponse.empty();
+            case NEXT:
+                return next(continuation);
+        }
+        return YoutubeResponse.empty();
     }
 
     private static YoutubeResponse browse(String continuation) throws IOException {
-        String jsonString = HttpUtility.getInstance().post("https://youtubei.googleapis.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", RequestUtility.buildContinuationRequest(continuation).toString());
+        String jsonString = HttpUtility.getInstance().post(RequestUtility.getBrowseUrl(), RequestUtility.buildContinuationRequest(continuation).toString());
         return extractPlaylistSongs(jsonString, "appendContinuationItemsAction\":{\"continuationItems\":[");
     }
 
     public static YoutubeResponse next(String continuation) throws IOException {
-        String htmlString = HttpUtility.getInstance().post("https://youtubei.googleapis.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false", RequestUtility.buildContinuationRequest(continuation).toString());
+        String htmlString = HttpUtility.getInstance().post(RequestUtility.getNextUrl(), RequestUtility.buildContinuationRequest(continuation).toString());
         return extractPlaylistSongs(htmlString, "playlistVideoListRenderer\":{\"contents\":[");
     }
 
@@ -179,7 +234,7 @@ public class ExtractorHelper {
                 PlaylistVideoRenderer videoRenderer = playlistVideoItem.getPlaylistVideoRenderer();
                 if (videoRenderer == null) {
                     ContinuationItemRenderer continuationItemRenderer = playlistVideoItem.getContinuationItemRenderer();
-                    if(continuationItemRenderer != null) {
+                    if (continuationItemRenderer != null) {
                         continuationCommand = continuationItemRenderer.getContinuationEndpoint().getContinuationCommand();
                     }
                     continue;
@@ -280,6 +335,78 @@ public class ExtractorHelper {
         }
 
         return youtubePlaylistMap;
+    }
+
+
+    public static YoutubeResponse watchNext(String videoId) throws ExtractionException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("videoId", videoId);
+        payload.put("context", RequestUtility.buildContext());
+        return extractWatchNextSongs(new JSONObject(payload), "\"twoColumnWatchNextResults\":{", Arrays.asList("secondaryResults", "secondaryResults", "results"));
+    }
+
+    public static YoutubeResponse watchNextContinuation(String videoId, String continuation) throws ExtractionException {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("continuation", continuation);
+        payload.put("context", RequestUtility.buildContext());
+        return extractWatchNextSongs(new JSONObject(payload), "\"appendContinuationItemsAction\":{", Collections.singletonList("continuationItems"));
+    }
+
+    private static YoutubeResponse extractWatchNextSongs(JSONObject payload, String initialSearchText, List<String> preKeys) throws ExtractionException {
+        try {
+            List<YoutubeSong> youtubeSongs = new ArrayList<>();
+            ContinuationCommand continuationCommand = new ContinuationCommand();
+            String watchNextHtml = HttpUtility.getInstance().post(RequestUtility.getNextUrl(), payload.toString());
+            String watchNextJson = JsonUtil.extractJsonFromHtml(initialSearchText, watchNextHtml);
+            JSONObject response = new JSONObject(watchNextJson);
+            JSONArray finalResponse = null;
+            for (int i = 0; i < preKeys.size(); i++) {
+                if (i == preKeys.size() - 1) {
+                    finalResponse = response.getJSONArray(preKeys.get(i));
+                } else {
+                    if (response.has(preKeys.get(i)))
+                        response = response.getJSONObject(preKeys.get(i));
+                    else return YoutubeResponse.empty();
+                }
+            }
+            if (finalResponse == null)
+                return YoutubeResponse.empty();
+            JsonAdapter<List<WatchNextContinuationItem>> adapter = moshiKotlin.adapter(Types.newParameterizedType(List.class, WatchNextContinuationItem.class));
+            List<WatchNextContinuationItem> watchNextContinuationItems = adapter.fromJson(finalResponse.toString());
+            if (watchNextContinuationItems == null)
+                return YoutubeResponse.empty();
+            for (WatchNextContinuationItem item : watchNextContinuationItems) {
+                if (item.getCompactVideoRenderer() != null) {
+                    CompactVideoRenderer videoRenderer = item.getCompactVideoRenderer();
+                    YoutubeSong youtubeSong = new YoutubeSong();
+                    youtubeSong.setVideoId(videoRenderer.getVideoId());
+                    String videoTitle = videoRenderer.getTitle() != null ? videoRenderer.getTitle().getSimpleText() : "Unknown";
+                    youtubeSong.setTitle(videoTitle);
+                    String ownerTitle = CollectionUtility.isEmpty(videoRenderer.getLongBylineText().getRuns()) ? "Unknown" : videoRenderer.getLongBylineText().getRuns().get(0).getText();
+                    youtubeSong.setChannelTitle(ownerTitle);
+                    youtubeSong.setDurationMillis(videoRenderer.getLengthText() != null ? CommonUtility.stringToMillis(videoRenderer.getLengthText().getSimpleText()) : 0L);
+                    List<ThumbnailsItem> thumbnails = videoRenderer.getThumbnail().getThumbnails();
+                    Collections.sort(thumbnails, (o1, o2) -> o1.getWidth().compareTo(o2.getWidth()));
+                    String url1 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(0).getUrl();
+                    String url2 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.size() > 1 ? thumbnails.get(1).getUrl() : url1;
+                    String url3 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(thumbnails.size() - 1).getUrl();
+                    youtubeSong.setArtUrlMedium(url2);
+                    youtubeSong.setArtUrlSmall(url1);
+                    youtubeSong.setArtUrlHigh(url3);
+                    youtubeSong.setView(videoRenderer.getViewCountText().getSimpleText());
+
+                    youtubeSongs.add(youtubeSong);
+
+
+                } else if (item.getContinuationItemRenderer() != null) {
+                    continuationCommand = item.getContinuationItemRenderer().getContinuationEndpoint().getContinuationCommand();
+                }
+            }
+
+            return new YoutubeResponse(youtubeSongs, continuationCommand.getToken(), continuationCommand.getRequest());
+        } catch (Exception e) {
+            throw new ExtractionException("Error while extracting songs from watch next", e);
+        }
     }
 
     public static void contentFromYoutubeMusic() {
