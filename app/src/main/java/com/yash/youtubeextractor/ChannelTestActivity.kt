@@ -2,12 +2,14 @@ package com.yash.youtubeextractor
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.core.view.GravityCompat
 import com.yash.youtube_extractor.ExtractorHelper
 import com.yash.youtubeextractor.databinding.ActivityKotlinTestBinding
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 class ChannelTestActivity : AppCompatActivity() {
     lateinit var kotlinTestBinding: ActivityKotlinTestBinding
@@ -28,17 +30,19 @@ class ChannelTestActivity : AppCompatActivity() {
                 ).show()
                 return@setOnClickListener
             }
-            val channelPlaylists =
-                ExtractorHelper.channelPlaylists(kotlinTestBinding.videoId.editText?.text.toString())
-            var response = "";
-            channelPlaylists.entries.forEach { entry ->
-                response = response + entry.key + "\n";
-                response = response + entry.value + "\n";
-                response += "\n";
-            }
-            runOnUiThread {
-                kotlinTestBinding.testResult.gravity = GravityCompat.START
-                kotlinTestBinding.testResult.text = response
+            MainScope().launch(Dispatchers.IO) {
+                val channelPlaylists =
+                    ExtractorHelper.channelInfo(kotlinTestBinding.videoId.editText?.text.toString())
+                var response = "";
+                channelPlaylists.playlistsByCategory.entries.forEach { entry ->
+                    response = response + entry.key + "\n";
+                    response = response + entry.value + "\n";
+                    response += "\n";
+                }
+                runOnUiThread {
+                    kotlinTestBinding.testResult.gravity = GravityCompat.START
+                    kotlinTestBinding.testResult.text = response
+                }
             }
 
         }

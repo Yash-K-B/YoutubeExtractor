@@ -10,6 +10,7 @@ import com.yash.youtube_extractor.constants.Constants;
 import com.yash.youtube_extractor.constants.ContinuationType;
 import com.yash.youtube_extractor.constants.ResponseFrom;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
+import com.yash.youtube_extractor.models.YoutubeChannelInfo;
 import com.yash.youtube_extractor.models.YoutubeResponse;
 import com.yash.youtube_extractor.models.YoutubePlaylist;
 import com.yash.youtube_extractor.models.YoutubeSong;
@@ -31,8 +32,6 @@ import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoItem;
 import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoRenderer;
 import com.yash.youtube_extractor.pojo.search.ItemSelectionContentsItem;
 import com.yash.youtube_extractor.pojo.search.ItemsItem;
-import com.yash.youtube_extractor.pojo.search.SearchResponse;
-import com.yash.youtube_extractor.pojo.search.SectionListRenderer;
 import com.yash.youtube_extractor.pojo.search.SelectionListContentsItem;
 import com.yash.youtube_extractor.pojo.search.VideoRenderer;
 import com.yash.youtube_extractor.utility.CollectionUtility;
@@ -43,7 +42,6 @@ import com.yash.youtube_extractor.utility.RequestUtility;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -54,7 +52,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ExtractorHelper {
@@ -264,18 +261,25 @@ public class ExtractorHelper {
         return new YoutubeResponse(songs, continuationCommand.getToken(), continuationCommand.getRequest());
     }
 
-    public static Map<String, List<YoutubePlaylist>> channelPlaylists(String channelId) {
-        String url = String.format(Constants.CHANNEL_URL_PLACEHOLDER, channelId);
-        String playlistHtml = CommonUtility.getHtmlString(url);
-
-        Map<String, List<YoutubePlaylist>> youtubePlaylistMap = new LinkedHashMap<>();
-
-        String channelDetailJson = JsonUtil.extractJsonFromHtmlV2("\"sectionListRenderer\":{\"contents\":[", playlistHtml, ResponseFrom.END);
-        JsonAdapter<List<ChannelItem>> adapter = moshi.adapter(Types.newParameterizedType(List.class, ChannelItem.class));
+    public static YoutubeChannelInfo channelInfo(String channelId) {
+        YoutubeChannelInfo youtubeChannelInfo = new YoutubeChannelInfo();
         try {
+            String url = String.format(Constants.CHANNEL_URL_PLACEHOLDER, channelId);
+            String playlistHtml = CommonUtility.getHtmlString(url);
+
+            String apiInfo = JsonUtil.extractJsonFromHtml("\"INNERTUBE_API_KEY\"", playlistHtml);
+            JSONObject apiInfoJson = new JSONObject(String.format("{\"INNERTUBE_API_KEY%s}", apiInfo));
+            youtubeChannelInfo.setApiKey(apiInfoJson.getString("INNERTUBE_API_KEY"));
+            youtubeChannelInfo.setClientVersion(apiInfoJson.getString("INNERTUBE_CLIENT_VERSION"));
+            youtubeChannelInfo.setVisitorData(apiInfoJson.getJSONObject("INNERTUBE_CONTEXT").getJSONObject("client").getString("visitorData"));
+            Map<String, List<YoutubePlaylist>> youtubePlaylistMap = new LinkedHashMap<>();
+
+            String channelDetailJson = JsonUtil.extractJsonFromHtmlV2("\"sectionListRenderer\":{\"contents\":[", playlistHtml, ResponseFrom.END);
+            JsonAdapter<List<ChannelItem>> adapter = moshi.adapter(Types.newParameterizedType(List.class, ChannelItem.class));
+
             List<ChannelItem> channelItems = adapter.fromJson(channelDetailJson);
             if (CollectionUtility.isEmpty(channelItems))
-                return youtubePlaylistMap;
+                return youtubeChannelInfo;
 
             for (ChannelItem item : channelItems) {
                 ItemSectionRenderer itemSectionRenderer = item.getItemSectionRenderer();
@@ -327,6 +331,7 @@ public class ExtractorHelper {
                     } else {
                         youtubePlaylistMap.put(UUID.randomUUID().toString(), playlists);
                     }
+                    youtubeChannelInfo.setPlaylistsByCategory(youtubePlaylistMap);
 
                 }
             }
@@ -334,7 +339,7 @@ public class ExtractorHelper {
             Log.e(TAG, "Error while fetching channel details : " + e);
         }
 
-        return youtubePlaylistMap;
+        return youtubeChannelInfo;
     }
 
 

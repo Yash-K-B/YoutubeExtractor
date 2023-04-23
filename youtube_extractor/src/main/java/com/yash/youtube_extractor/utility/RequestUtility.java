@@ -91,7 +91,7 @@ public class RequestUtility {
     }
 
     public static String getLocation() {
-        return getOrDefault(LOCATION_KEY, RequestUtility.DEFAULT_LANGUAGE);
+        return getOrDefault(LOCATION_KEY, RequestUtility.DEFAULT_LOCATION);
     }
 
     public static String getVisitorData() {
