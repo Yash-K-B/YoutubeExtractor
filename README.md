@@ -57,7 +57,7 @@ dependencies {
 
 # Credits
 
-[JSoup](https://github.com/jhy/jsoup) - webpage source code download
+[OkHttp](https://square.github.io/okhttp/) - Caching and downloading web pages
 
 # License
 ```
