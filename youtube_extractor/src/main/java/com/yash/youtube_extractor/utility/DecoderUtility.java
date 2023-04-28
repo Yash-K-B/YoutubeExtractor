@@ -3,13 +3,10 @@ package com.yash.youtube_extractor.utility;
 import android.net.Uri;
 import android.util.Log;
 
+import com.yash.youtube_extractor.builders.UriBuilder;
 import com.yash.youtube_extractor.models.Decoder;
-import com.yash.youtube_extractor.models.StreamingData;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,11 +33,14 @@ public class DecoderUtility {
 
     public static String decodeThrottle(String url, Decoder decoder) {
         if (decoder == null) return url;
+        Log.i(TAG, "decodeThrottle: Before : "+ url);
         Uri uri = Uri.parse(url);
         String parameter = Uri.decode(uri.getQueryParameter("n"));
         String decodedThrottle = decoder.decodeThrottle(parameter);
         Log.d(TAG, "Parameter : " + parameter + " Decoded Val: " + decodedThrottle + " : mime : " + uri.getQueryParameter("mime"));
-        return url.replace("&n=" + parameter, "&n=" + decodedThrottle);
+        String s = UriBuilder.from(url).replaceParam("n", decodedThrottle).appendParamBefore("ratebypass", "yes", "n").build();
+        Log.i(TAG, "decodeThrottle: After : "+ s);
+        return s;
     }
 
     public static String getUrl(String url, String signatureCipher, Decoder decoder) {

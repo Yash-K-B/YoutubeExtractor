@@ -17,6 +17,7 @@ import com.yash.youtube_extractor.models.VideoData;
 import com.yash.youtube_extractor.models.VideoDetails;
 import com.yash.youtube_extractor.utility.CommonUtility;
 import com.yash.youtube_extractor.utility.ConverterUtil;
+import com.yash.youtube_extractor.utility.HttpUtility;
 import com.yash.youtube_extractor.utility.JsonUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -99,7 +100,7 @@ public class Extractor {
             Matcher matcher = pattern.matcher(html);
             String playerJs;
             if (matcher.find()) {
-                playerJs = CommonUtility.getHtmlString("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
+                playerJs = HttpUtility.getInstance().getWith1MonthCache("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
             } else {
                 throw new ExtractionException("Player JS Not available");
             }

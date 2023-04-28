@@ -24,9 +24,9 @@ public class StreamingData implements Serializable {
     @Json(name = "expiresInSeconds")
     private String expiresInSeconds;
     @Json(name = "formats")
-    private List<Format> formats = null;
+    private List<Format> formats = new ArrayList<>();
     @Json(name = "adaptiveFormats")
-    private List<AdaptiveFormat> adaptiveFormats = null;
+    private List<AdaptiveFormat> adaptiveFormats = new ArrayList<>();
 
     private List<AdaptiveAudioFormat> adaptiveAudioFormats = new ArrayList<>();
 
@@ -44,12 +44,8 @@ public class StreamingData implements Serializable {
         return formats;
     }
 
-    public void getMuxedStreamFormats(List<Format> formats) {
+    public void setMuxedStreamFormats(List<Format> formats) {
         this.formats = formats;
-    }
-
-    public List<AdaptiveFormat> getAdaptiveFormats() {
-        return adaptiveFormats;
     }
 
     public void setAdaptiveFormats(List<AdaptiveFormat> adaptiveFormats) {
@@ -57,7 +53,6 @@ public class StreamingData implements Serializable {
     }
 
     public List<AdaptiveAudioFormat> getAdaptiveAudioFormats() {
-        //initFormats();
         return adaptiveAudioFormats;
     }
 
@@ -66,7 +61,6 @@ public class StreamingData implements Serializable {
     }
 
     public List<AdaptiveVideoFormat> getAdaptiveVideoFormats() {
-        //initFormats();
         return adaptiveVideoFormats;
     }
 
@@ -74,16 +68,6 @@ public class StreamingData implements Serializable {
         this.adaptiveVideoFormats = adaptiveVideoFormats;
     }
 
-//    private void initFormats() {
-//        if (adaptiveFormats == null) return;
-//        if (isFormatInitialized) return;
-//        for (int i = 0; i < adaptiveFormats.size(); i++) {
-//            if (adaptiveFormats.get(i).getHeight() == null)
-//                adaptiveAudioFormats.add(new AdaptiveAudioFormat(adaptiveFormats.get(i)));
-//            else adaptiveVideoFormats.add(new AdaptiveVideoFormat(adaptiveFormats.get(i)));
-//        }
-//        isFormatInitialized = true;
-//    }
 
     public static class ColorInfo {
 
@@ -615,49 +599,9 @@ public class StreamingData implements Serializable {
         isFormatInitialized = true;
     }
 
-
-    //regex player js = /s/player/([A-za-z0-9_]+)/player_ias.vflset/en_US/base.js
-
-    /*  Decoder Function */
-    private static String decode(String str) {
-
-
-        StringBuilder builder = new StringBuilder(str);
-        //set1
-//        Eu(builder, 29);
-//        oG(builder, 9);
-//        Eu(builder, 38);
-//        oG(builder, 66);
-        //set2 version = 4a1799bd
-        //regex = ([A-za-z0-9_]+)\s*=\s*function\(\s*a\s*\)\{\s*a\s*=\s*a.split\(\"\"\);.*a.join\(\"\"\)\};
-        by(builder, 2);
-        Eu(builder, 30);
-        oG(builder, 36);
-        Context context = Context.enter();
-        Scriptable scope = context.initStandardObjects();
-
-        return builder.toString();
-    }
-
-
-    private static void oG(StringBuilder builder, int b) {
-        builder.reverse();
-    }
-
-    private static void Eu(StringBuilder builder, int b) {
-        char c = builder.charAt(0);
-        builder.setCharAt(0, builder.charAt(b % builder.length()));
-        builder.setCharAt(b % builder.length(), c);
-    }
-
-    private static void by(StringBuilder builder, int b) {
-        builder.delete(0, b);
-    }
-
     @NonNull
     @Override
     public String toString() {
-        //initFormats();
         StringBuilder builder = new StringBuilder();
         builder.append("AdaptiveAudioFormat : \n\n");
         for (AdaptiveAudioFormat audioFormat : adaptiveAudioFormats) {

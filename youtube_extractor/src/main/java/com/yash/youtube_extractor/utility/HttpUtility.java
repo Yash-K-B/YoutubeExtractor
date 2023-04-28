@@ -1,6 +1,7 @@
 package com.yash.youtube_extractor.utility;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HttpUtility {
+    private static final String TAG = "HttpUtility";
 
     private static final int READ_TIMEOUT = 0;
     private static final int WRITE_TIMEOUT = 0;
@@ -70,6 +72,20 @@ public class HttpUtility {
 
         Request request = builder.build();
         try(Response response = client.newCall(request).execute()) {
+            return response.body().string();
+        }
+    }
+
+    public String getWith1MonthCache(String url) throws IOException {
+        Request.Builder builder = new Request.Builder()
+                .url(url)
+                .headers(getHeaders());
+        builder.cacheControl(new CacheControl.Builder().maxAge(30, TimeUnit.DAYS).maxStale(30, TimeUnit.DAYS).build());
+
+        Request request = builder.build();
+        try(Response response = client.newCall(request).execute()) {
+            Log.i(TAG, "getWith1MonthCache: " + response.cacheResponse());
+            Log.i(TAG, "getWith1MonthCache: " + response.networkResponse());
             return response.body().string();
         }
     }

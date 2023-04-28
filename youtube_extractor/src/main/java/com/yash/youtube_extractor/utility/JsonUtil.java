@@ -104,7 +104,7 @@ public class JsonUtil {
         StringBuilder builder = new StringBuilder();
 //        StringBuilder regExBuilder = new StringBuilder();
         if (stIndex == -1) return builder.toString();
-        char ch, preCh;
+        char ch, preCh, preCh2;
         char startChar = responseFrom == ResponseFrom.START ? initial.charAt(0) : initial.charAt(initial.length() - 1);
         Character endCharacter = endCharacterMap.get(startChar);
         char endChar = endCharacter == null ? startChar : endCharacter;
@@ -112,14 +112,25 @@ public class JsonUtil {
         boolean dQuoteStarted = false;
         boolean sQuoteStarted = false;
         boolean regExStarted = false;
+        boolean regexCharSetStarted = false;
         for (int st = stIndex + initial.length() - 1; st < html.length(); st++) {
+            preCh2 = html.charAt(st - 2);
             preCh = html.charAt(st - 1);
             ch = html.charAt(st);
             builder.append(ch);
+
+            if(regExStarted && ch=='[' && !isEscaped(preCh, preCh2)) {
+                regexCharSetStarted = true;
+            }
+
+            if(regExStarted && regexCharSetStarted && ch==']' && !isEscaped(preCh, preCh2)) {
+                regexCharSetStarted = false;
+            }
+
             if(!(dQuoteStarted || sQuoteStarted) && !regExStarted && (preCh == ',' || preCh == '(') && ch == '/') {
                 Log.i(TAG, "Regex started");
                 regExStarted = true;
-            } else if(!(dQuoteStarted || sQuoteStarted) && regExStarted && ((ch == '/' && preCh != '\\') || (ch == 'g' && preCh != '/'))) {
+            } else if(!(dQuoteStarted || sQuoteStarted) && !regexCharSetStarted && regExStarted && ((ch == '/' && !isEscaped(preCh, preCh2)) || (ch == 'g' && preCh != '/'))) {
                 Log.i(TAG, "Regex ended");
                 regExStarted = false;
             }
@@ -131,24 +142,31 @@ public class JsonUtil {
 //                regExBuilder = new StringBuilder();
 //            }
 
-            if(ch == '"' && preCh != '\\' && !(sQuoteStarted || regExStarted)) {
+            if(ch == '"' && !isEscaped(preCh, preCh2) && !(sQuoteStarted || regExStarted)) {
                 dQuoteStarted = !dQuoteStarted;
             }
 
-            if(ch == '\'' && preCh != '\\' && !(dQuoteStarted || regExStarted)) {
+            if(ch == '\'' && !isEscaped(preCh, preCh2) && !(dQuoteStarted || regExStarted)) {
                 sQuoteStarted = !sQuoteStarted;
             }
 
-            if (ch == startChar && preCh != '\\' && !(dQuoteStarted || sQuoteStarted || regExStarted)) {
+            if (ch == startChar && !isEscaped(preCh, preCh2) && !(dQuoteStarted || sQuoteStarted || regExStarted)) {
                 counter++;
                 continue;
             }
-            if (ch == endChar && preCh != '\\' && !(dQuoteStarted || sQuoteStarted || regExStarted)) {
+            if (ch == endChar && !isEscaped(preCh, preCh2) && !(dQuoteStarted || sQuoteStarted || regExStarted)) {
                 counter--;
                 if (counter == 0) break;
             }
         }
         return builder.toString();
+    }
+
+    private static boolean isEscaped(char pch1, char pch2) {
+        if(pch1 != '\\')
+            return false;
+
+        return pch2 != '\\';
     }
 
 

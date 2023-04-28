@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.yash.logging.LogHelper;
 import com.yash.youtube_extractor.helper.PatternHelper;
 import com.yash.youtube_extractor.models.Format;
 import com.yash.youtube_extractor.models.StreamingData;
@@ -23,6 +24,7 @@ import java.util.regex.Matcher;
 import static android.content.Context.CLIPBOARD_SERVICE;
 
 public class StreamsAdapter extends RecyclerView.Adapter<StreamsAdapter.StreamViewHolder> {
+    private static final String TAG = "StreamsAdapter";
     MyData data;
     Context context;
 
@@ -71,6 +73,7 @@ public class StreamsAdapter extends RecyclerView.Adapter<StreamsAdapter.StreamVi
                         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
                         ClipData copyData = ClipData.newPlainText("Url", myData.getMuxedStreams().get(position).getUrl());
                         clipboardManager.setPrimaryClip(copyData);
+                        LogHelper.d(TAG, "bind: %s", myData.getMuxedStreams().get(position).getUrl());
                         Toast.makeText(context, "Url Copied", Toast.LENGTH_SHORT).show();
                     });
                     //LogHelper.d(TAG, "bind: Muxed Stream Url :" + myData.getMuxedStreams().get(position).getUrl());
@@ -86,6 +89,7 @@ public class StreamsAdapter extends RecyclerView.Adapter<StreamsAdapter.StreamVi
                         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
                         ClipData copyData = ClipData.newPlainText("Url", myData.getAudioStreams().get(position - myData.getMuxedStreams().size()).getUrl());
                         clipboardManager.setPrimaryClip(copyData);
+                        LogHelper.d(TAG, "bind: %s", myData.getAudioStreams().get(position - myData.getMuxedStreams().size()).getUrl());
                         Toast.makeText(context, "Url Copied", Toast.LENGTH_SHORT).show();
                     });
                     //LogHelper.d(TAG, "bind: Audio Url :" + myData.getAudioStreams().get(position - myData.getMuxedStreams().size()).getUrl());
@@ -101,6 +105,7 @@ public class StreamsAdapter extends RecyclerView.Adapter<StreamsAdapter.StreamVi
                         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
                         ClipData copyData = ClipData.newPlainText("Url", myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl());
                         clipboardManager.setPrimaryClip(copyData);
+                        LogHelper.d(TAG, "bind: %s", myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl());
                         Toast.makeText(context, "Url Copied", Toast.LENGTH_SHORT).show();
                     });
                     //LogHelper.d(TAG, "bind: Video Url :" + myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl());
