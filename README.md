@@ -47,6 +47,11 @@ dependencies {
 
 ```
 
+# If you are using Proguard add the following line
+```
+-keep class org.mozilla.javascript.** { *; }
+```
+
 # Response Object
 
 ![](https://github.com/Yash-K-B/YoutubeExtractor/blob/master/screenshots/Screenshot2.jpg?raw=true)
