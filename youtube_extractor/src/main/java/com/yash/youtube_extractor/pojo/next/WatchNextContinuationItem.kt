@@ -2,6 +2,7 @@ package com.yash.youtube_extractor.pojo.next
 
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Json
+import com.yash.youtube_extractor.pojo.common.LengthText
 import com.yash.youtube_extractor.pojo.common.ThumbnailsItem
 import com.yash.youtube_extractor.pojo.playlist.ContinuationCommand
 
@@ -334,15 +335,6 @@ data class RichThumbnail(
 	val movingThumbnailRenderer: MovingThumbnailRenderer? = null
 )
 
-@JsonClass(generateAdapter = true)
-data class LengthText(
-
-	@Json(name="simpleText")
-	val simpleText: String? = null,
-
-	@Json(name="accessibility")
-	val accessibility: Accessibility? = null
-)
 
 @JsonClass(generateAdapter = true)
 data class UntoggledAccessibility(

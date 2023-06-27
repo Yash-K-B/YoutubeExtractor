@@ -147,7 +147,7 @@ public class ExtractorHelper {
                                 youtubeSong.setTitle(videoTitle);
                                 String ownerTitle = CollectionUtility.isEmpty(videoRenderer.getOwnerText().getRuns()) ? "Unknown" : videoRenderer.getOwnerText().getRuns().get(0).getText();
                                 youtubeSong.setChannelTitle(ownerTitle);
-                                youtubeSong.setDurationMillis(CommonUtility.stringToMillis(videoRenderer.getLengthText().getSimpleText()));
+                                youtubeSong.setDurationMillis(CommonUtility.fromLengthText(videoRenderer.getLengthText()));
                                 List<ThumbnailsItem> thumbnails = videoRenderer.getThumbnail().getThumbnails();
                                 Collections.sort(thumbnails, (o1, o2) -> o1.getWidth().compareTo(o2.getWidth()));
                                 String url1 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(0).getUrl();
@@ -389,7 +389,7 @@ public class ExtractorHelper {
                     youtubeSong.setTitle(videoTitle);
                     String ownerTitle = CollectionUtility.isEmpty(videoRenderer.getLongBylineText().getRuns()) ? "Unknown" : videoRenderer.getLongBylineText().getRuns().get(0).getText();
                     youtubeSong.setChannelTitle(ownerTitle);
-                    youtubeSong.setDurationMillis(videoRenderer.getLengthText() != null ? CommonUtility.stringToMillis(videoRenderer.getLengthText().getSimpleText()) : 0L);
+                    youtubeSong.setDurationMillis(CommonUtility.fromLengthText(videoRenderer.getLengthText()));
                     List<ThumbnailsItem> thumbnails = videoRenderer.getThumbnail().getThumbnails();
                     Collections.sort(thumbnails, (o1, o2) -> o1.getWidth().compareTo(o2.getWidth()));
                     String url1 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(0).getUrl();
