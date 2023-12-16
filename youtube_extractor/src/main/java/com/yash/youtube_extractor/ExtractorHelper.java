@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class ExtractorHelper {
@@ -313,7 +314,7 @@ public class ExtractorHelper {
                         } else {
                             playlist.setTitle(compactStationRenderer.getTitle().getSimpleText());
                             playlist.setDescription(compactStationRenderer.getDescription().getSimpleText());
-                            playlist.setPlaylistId(compactStationRenderer.getNavigationEndpoint().getWatchEndpoint().getPlaylistId());
+                            playlist.setPlaylistId(Objects.isNull(compactStationRenderer.getNavigationEndpoint().getWatchEndpoint()) ? compactStationRenderer.getNavigationEndpoint().getWatchPlaylistEndpoint().getPlaylistId() : compactStationRenderer.getNavigationEndpoint().getWatchEndpoint().getPlaylistId());
                             playlist.setVideoCount(CollectionUtility.join(compactStationRenderer.getVideoCountText().getRuns(), RunsItem::getText, ' '));
                             List<ThumbnailsItem> thumbnails = compactStationRenderer.getThumbnail().getThumbnails();
                             String url1 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(0).getUrl();

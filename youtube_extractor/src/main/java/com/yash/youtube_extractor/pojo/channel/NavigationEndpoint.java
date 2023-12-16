@@ -16,6 +16,9 @@ public class NavigationEndpoint{
 	@Json(name = "watchEndpoint")
 	private WatchEndpoint watchEndpoint;
 
+	@Json(name = "watchPlaylistEndpoint")
+	private WatchPlaylistEndpoint watchPlaylistEndpoint;
+
 	public void setCommandMetadata(CommandMetadata commandMetadata){
 		this.commandMetadata = commandMetadata;
 	}
@@ -48,14 +51,22 @@ public class NavigationEndpoint{
 		return watchEndpoint;
 	}
 
+	public WatchPlaylistEndpoint getWatchPlaylistEndpoint() {
+		return watchPlaylistEndpoint;
+	}
+
+	public void setWatchPlaylistEndpoint(WatchPlaylistEndpoint watchPlaylistEndpoint) {
+		this.watchPlaylistEndpoint = watchPlaylistEndpoint;
+	}
+
 	@Override
- 	public String toString(){
-		return 
-			"NavigationEndpoint{" + 
-			"commandMetadata = '" + commandMetadata + '\'' + 
-			",clickTrackingParams = '" + clickTrackingParams + '\'' + 
-			",browseEndpoint = '" + browseEndpoint + '\'' + 
-			",watchEndpoint = '" + watchEndpoint + '\'' + 
-			"}";
-		}
+	public String toString() {
+		return "NavigationEndpoint{" +
+				"commandMetadata=" + commandMetadata +
+				", clickTrackingParams='" + clickTrackingParams + '\'' +
+				", browseEndpoint=" + browseEndpoint +
+				", watchEndpoint=" + watchEndpoint +
+				", watchPlaylistEndpoint=" + watchPlaylistEndpoint +
+				'}';
+	}
 }
