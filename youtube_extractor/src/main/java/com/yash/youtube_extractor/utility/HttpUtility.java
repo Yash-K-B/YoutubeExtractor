@@ -3,6 +3,9 @@ package com.yash.youtube_extractor.utility;
 import android.content.Context;
 import android.util.Log;
 
+import com.yash.youtube_extractor.interfaces.NetworkListener;
+import com.yash.youtube_extractor.receivers.ConnectivityReceiver;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +14,14 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Headers;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HttpUtility {
+public class HttpUtility implements ConnectivityReceiver.ConnectivityReceiverListener {
     private static final String TAG = "HttpUtility";
 
     private static final int READ_TIMEOUT = 0;
@@ -26,12 +30,13 @@ public class HttpUtility {
     private static HttpUtility instance;
     public static HttpUtility getInstance() {
         if(instance == null)
-            instance = new HttpUtility();
+            throw new RuntimeException("HttpUtility not initialised");
         return instance;
     }
 
     private final OkHttpClient client;
     private CacheControl cacheControl;
+    private boolean isNetworkAvailable = true;
 
     private HttpUtility(Cache cache, CacheControl cacheControl) {
         this.client = new OkHttpClient.Builder()
@@ -39,6 +44,8 @@ public class HttpUtility {
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .addNetworkInterceptor(networkCacheInterceptor)
+                .addInterceptor(cacheInterceptor)
                 .build();
         this.cacheControl = cacheControl;
     }
@@ -48,6 +55,8 @@ public class HttpUtility {
                 .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .addNetworkInterceptor(networkCacheInterceptor)
+                .addInterceptor(cacheInterceptor)
                 .build();
     }
 
@@ -55,6 +64,35 @@ public class HttpUtility {
     public static void initialise(Cache cache, CacheControl cacheControl) {
         instance = new HttpUtility(cache, cacheControl);
     }
+
+
+    Interceptor networkCacheInterceptor = new Interceptor() {
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Response originalResponse = chain.proceed(chain.request());
+            String cacheControlStr = originalResponse.header("Cache-Control");
+            if (cacheControl != null && (cacheControlStr == null || cacheControlStr.contains("no-store") || cacheControlStr.contains("no-cache") ||
+                    cacheControlStr.contains("must-revalidate") || cacheControlStr.contains("max-age=0"))) {
+                return originalResponse.newBuilder()
+                        .removeHeader("Pragma")
+                        .header("Cache-Control", "public, " + cacheControl.toString() )
+                        .build();
+            } else {
+                return originalResponse;
+            }
+        }
+    };
+
+    private final Interceptor cacheInterceptor = chain -> {
+        Request request = chain.request();
+        if(!isNetworkAvailable) {
+            request = request.newBuilder()
+                    .removeHeader("Pragma")
+                    .header("Cache-Control", "public, only-if-cached")
+                    .build();
+        }
+        return chain.proceed(request);
+    };
 
     public Headers getHeaders() {
         Map<String, String> headers = new HashMap<>();
@@ -104,6 +142,8 @@ public class HttpUtility {
         }
     }
 
-
-
+    @Override
+    public void onNetworkConnectionChanged(boolean isConnected) {
+        isNetworkAvailable = isConnected;
+    }
 }

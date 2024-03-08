@@ -1,9 +1,12 @@
 package com.yash.youtubeextractor;
 
 import android.app.Application;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
 import com.yash.logging.LogHelper;
+import com.yash.youtube_extractor.receivers.ConnectivityReceiver;
 import com.yash.youtube_extractor.utility.HttpUtility;
 import com.yash.youtube_extractor.utility.RequestUtility;
 
@@ -20,5 +23,6 @@ public class YoutubeExtractor extends Application {
 
         HttpUtility.initialise(new Cache(getCacheDir(), 41_943_040), new CacheControl.Builder().maxAge(2, TimeUnit.DAYS).maxStale(2, TimeUnit.DAYS).build());
         RequestUtility.updateSettings(PreferenceManager.getDefaultSharedPreferences(this));
+        registerReceiver(new ConnectivityReceiver(), new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 }
