@@ -1,13 +1,7 @@
 plugins {
     id 'com.android.library'
-    id 'io.franzbecker.gradle-lombok' version '5.0.0'
 }
 apply plugin: 'kotlin-android'
-
-lombok {
-    version = "1.18.24"
-    sha256 = ""
-}
 
 android {
     compileSdkVersion 33
@@ -27,10 +21,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
-    buildToolsVersion '31.0.0'
+    kotlinOptions {
+        jvmTarget=11
+    }
+    buildToolsVersion '34.0.0'
+    namespace 'com.yash.youtube_extractor'
 }
 
 dependencies {
@@ -47,8 +45,8 @@ dependencies {
 
     implementation 'commons-lang:commons-lang:2.6'
 
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
 

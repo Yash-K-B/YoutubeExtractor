@@ -19,6 +19,7 @@ import com.yash.youtube_extractor.utility.CommonUtility;
 import com.yash.youtube_extractor.utility.ConverterUtil;
 import com.yash.youtube_extractor.utility.HttpUtility;
 import com.yash.youtube_extractor.utility.JsonUtil;
+import com.yash.youtube_extractor.utility.RegExUtility;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -55,6 +56,7 @@ public class Extractor {
     }
 
     public VideoDetails extract(String videoId) throws ExtractionException {
+        // TODO: 09/08/24 add in url "?bpctr=9999999999&has_verified=1";
         String url = BASE_URL + videoId;
         try {
             long start, end, intermediate;
@@ -100,7 +102,7 @@ public class Extractor {
             Matcher matcher = pattern.matcher(html);
             String playerJs;
             if (matcher.find()) {
-                playerJs = HttpUtility.getInstance().getWith1MonthCache("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
+                playerJs = HttpUtility.getInstance().get("https://www.youtube.com" + Objects.requireNonNull(matcher.group(1)).replace("\\/", "/"));
             } else {
                 throw new ExtractionException("Player JS Not available");
             }
@@ -139,11 +141,11 @@ public class Extractor {
             Log.d("YOUTUBE_EXTRACTOR", "Cipher decoder function found in : " + ConverterUtil.formatDuration(end - intermediate));
 
 
-            Pattern throttleFunc = Pattern.compile("[A-Za-z0-9]+\\s*=\\s*[A-Za-z0-9]+\\s*\\.get\\(\"n\"\\)\\)\\s*&&\\s*\\([A-Za-z0-9]\\s*+=\\s*([A-Za-z0-9]+)\\[[0-9]+\\]\\([A-Za-z0-9]+\\),\\s*[A-Za-z0-9]+\\.set\\(\"n\",\\s*b\\),\\s*[A-Za-z0-9.]+\\s*\\|\\|\\s*([A-Za-z0-9]+)\\([A-Za-z0-9\"]+\\)");
+            Pattern throttleFunc = Pattern.compile(RegExUtility.getNSigRegex());
             Matcher throttleMatcher = throttleFunc.matcher(playerJs);
             boolean throttleFunctionAvailable = false;
             if (throttleMatcher.find()) {
-                throttleDecoderFunctionName = throttleMatcher.group(2);
+                throttleDecoderFunctionName = throttleMatcher.group(1);
 
                 intermediate = end;
                 end = SystemClock.currentThreadTimeMillis();

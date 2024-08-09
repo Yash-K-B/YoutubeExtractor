@@ -31,6 +31,13 @@ public class DecoderUtility {
         return String.format(Locale.US, "%s&%s=%s", url, paramKey, Uri.encode(decoder.decodeSignature(signature)));
     }
 
+    public static String decodeSignature(String url, Decoder decoder) {
+        if (decoder == null) return "";
+        Uri uri = Uri.parse(url);
+        String signature = Uri.decode(uri.getQueryParameter("sig"));
+        return UriBuilder.from(url).replaceParam("sig", Uri.encode(decoder.decodeSignature(signature))).build();
+    }
+
     public static String decodeThrottle(String url, Decoder decoder) {
         if (decoder == null) return url;
         Log.i(TAG, "decodeThrottle: Before : "+ url);
@@ -38,7 +45,7 @@ public class DecoderUtility {
         String parameter = Uri.decode(uri.getQueryParameter("n"));
         String decodedThrottle = decoder.decodeThrottle(parameter);
         Log.d(TAG, "Parameter : " + parameter + " Decoded Val: " + decodedThrottle + " : mime : " + uri.getQueryParameter("mime"));
-        String s = UriBuilder.from(url).replaceParam("n", decodedThrottle).appendParamBefore("ratebypass", "yes", "n").build();
+        String s = UriBuilder.from(url).replaceParam("n", decodedThrottle).build();
         Log.i(TAG, "decodeThrottle: After : "+ s);
         return s;
     }

@@ -12,10 +12,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+@Getter
+@ToString
 public class YoutubeResponse {
-    private List<YoutubeSong> songs;
-    private String continuationToken;
-    private ContinuationType continuationType;
+    private final List<YoutubeSong> songs;
+    private final String continuationToken;
+    private final ContinuationType continuationType;
 
     public YoutubeResponse(List<YoutubeSong> songs, String continuationToken, String continuationType) {
         this.songs = songs;
@@ -25,26 +27,5 @@ public class YoutubeResponse {
 
     public static YoutubeResponse empty() {
         return new YoutubeResponse(new ArrayList<>(), null, null);
-    }
-
-    public List<YoutubeSong> getSongs() {
-        return songs;
-    }
-
-    public String getContinuationToken() {
-        return continuationToken;
-    }
-
-    public ContinuationType getContinuationType() {
-        return continuationType;
-    }
-
-    @Override
-    public String toString() {
-        return "YoutubeResponse{" +
-                "songs=" + songs +
-                ", continuationToken='" + continuationToken + '\'' +
-                ", continuationType=" + continuationType +
-                '}';
     }
 }
