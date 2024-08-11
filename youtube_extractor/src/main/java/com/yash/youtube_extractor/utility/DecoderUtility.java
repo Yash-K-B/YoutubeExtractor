@@ -43,9 +43,11 @@ public class DecoderUtility {
         Log.i(TAG, "decodeThrottle: Before : "+ url);
         Uri uri = Uri.parse(url);
         String parameter = Uri.decode(uri.getQueryParameter("n"));
+        if(parameter == null || parameter.isEmpty())
+            return url;
         String decodedThrottle = decoder.decodeThrottle(parameter);
         Log.d(TAG, "Parameter : " + parameter + " Decoded Val: " + decodedThrottle + " : mime : " + uri.getQueryParameter("mime"));
-        String s = UriBuilder.from(url).replaceParam("n", decodedThrottle).build();
+        String s = UriBuilder.from(url).replaceParam("n", Uri.encode(decodedThrottle)).build();
         Log.i(TAG, "decodeThrottle: After : "+ s);
         return s;
     }

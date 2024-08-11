@@ -20,6 +20,7 @@ public class RequestUtility {
     private static final String CLIENT_API_KEY = "CLIENT_API_KEY";
 
     // Urls
+    public static final String YOUTUBE_DATA_API = "https://www.youtube.com/youtubei/v1/player?prettyPrint=false";
     private static final String BROWSE_URL_PLACEHOLDER = "https://youtubei.googleapis.com/youtubei/v1/browse?key=%s&prettyPrint=false";
     private static final String NEXT_URL_PLACEHOLDER = "https://youtubei.googleapis.com/youtubei/v1/next?key=%s&prettyPrint=false";
     private static final String SEARCH_URL_PLACEHOLDER = "https://www.youtube.com/youtubei/v1/search?key=%s&prettyPrint=false";
@@ -59,6 +60,31 @@ public class RequestUtility {
         context.put("client", client);
        return new JSONObject(context);
     }
+
+
+    public static JSONObject buildClientContext() {
+        Map<String, Object> client = new HashMap<>();
+        client.put("clientName", "IOS");
+        client.put("clientVersion", "19.29.1");
+        client.put("deviceMake", "Apple");
+        client.put("deviceModel", "iPhone16,2");
+        client.put("userAgent", "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)");
+        client.put("osName", "iPhone");
+        client.put("osVersion", "17.5.1.21F90");
+        client.put("hl", getLanguage());
+        client.put("timeZone", "UTC");
+        client.put("utcOffsetMinutes", 0);
+
+
+        Map<String, Object> context = new HashMap<>();
+        context.put("context", Map.of("client", client));
+        context.put("playbackContext", Map.of("contentPlaybackContext", Map.of("html5Preference", "HTML5_PREF_WANTS")));
+        context.put("contentCheckOk", true);
+        context.put("racyCheckOk", true);
+
+        return new JSONObject(context);
+    }
+
 
 
     public static JSONObject buildContinuationRequest(String continuationToken) {

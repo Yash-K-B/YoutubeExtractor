@@ -22,6 +22,7 @@ import com.yash.youtube_extractor.utility.JsonUtil;
 import com.yash.youtube_extractor.utility.RegExUtility;
 
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -44,7 +45,7 @@ public class Extractor {
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final String TAG = "Extractor";
-    public static final String BASE_URL = "https://m.youtube.com/watch?v=";
+    public static final String BASE_URL = "https://www.youtube.com/watch?v=";
     Context context;
     ScriptableObject scope;
     Function decoderFunction;
@@ -208,7 +209,7 @@ public class Extractor {
     public void extract(String videoId, Callback callback) {
         executorService.execute(() -> {
             try {
-                VideoDetails videoDetails = extract(videoId);
+                VideoDetails videoDetails = extractV2(videoId);
                 handler.post(() -> callback.onSuccess(videoDetails));
 
             } catch (ExtractionException e) {
@@ -238,6 +239,37 @@ public class Extractor {
         }
         return builder.toString();
     }
+
+
+    public VideoDetails extractV2(String videoId) throws ExtractionException {
+        long start, end;
+        Log.d("YOUTUBE_EXTRACTOR", "Starting extraction of video id - " + videoId);
+        start = SystemClock.currentThreadTimeMillis();
+        try {
+            JSONObject data = CommonUtility.getData(videoId);
+            if(data == null) {
+                throw new ExtractionException("Failed to extract data");
+            }
+
+            Moshi moshi = new Moshi.Builder().build();
+            StreamingData streamingData = moshi.adapter(StreamingData.class).fromJson(data.getString("streamingData"));
+            streamingData.initObject(null);
+
+            VideoData videoData = moshi.adapter(VideoData.class).fromJson(data.getString("videoDetails"));
+//            videoData.setChannelThumbnail(channelThumbnail);
+
+            end = SystemClock.currentThreadTimeMillis();
+            Log.d("YOUTUBE_EXTRACTOR", "extract : " + ConverterUtil.formatDuration(end - start));
+            return new VideoDetails(streamingData, videoData);
+
+        } catch (JSONException | IOException e) {
+            Log.e(TAG, "extractV2: Failed to extract details of video id : " + videoId, e);
+            throw new ExtractionException(e.getMessage(), e);
+        }
+
+    }
+
+
 
 
     public interface Callback {

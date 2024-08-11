@@ -7,6 +7,8 @@ import com.yash.youtube_extractor.pojo.common.LengthText;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,6 +23,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import okhttp3.Headers;
+
 public class CommonUtility {
     private static final String TAG = "CommonUtility";
 
@@ -30,6 +34,18 @@ public class CommonUtility {
         } catch (IOException e) {
             Log.e(TAG, "getHtmlString: ", e);
             return "";
+        }
+    }
+
+
+    public static JSONObject getData(String videoId) throws JSONException {
+        try {
+        JSONObject clientContext = RequestUtility.buildClientContext();
+        clientContext.put("videoId", videoId);
+        return new JSONObject(HttpUtility.getInstance().post(RequestUtility.YOUTUBE_DATA_API, clientContext.toString(), Headers.of("Content-Type","application/json")));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to get youtube data: ", e);
+            return null;
         }
     }
 

@@ -129,9 +129,13 @@ public class HttpUtility implements ConnectivityReceiver.ConnectivityReceiverLis
     }
 
     public String post(String url, String payload) throws IOException {
+        return post(url, payload, getHeaders());
+    }
+
+    public String post(String url, String payload, Headers headers) throws IOException {
         Request.Builder builder = new Request.Builder()
                 .url(url)
-                .headers(getHeaders());
+                .headers(headers);
         if(cacheControl != null)
             builder.cacheControl(cacheControl);
         builder.post(RequestBody.create(payload, MediaType.parse("application/json")));
