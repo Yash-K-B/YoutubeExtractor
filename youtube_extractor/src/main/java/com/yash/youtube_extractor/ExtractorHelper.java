@@ -29,6 +29,7 @@ import com.yash.youtube_extractor.pojo.channel.lockup.model.LockupViewModel;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.MetadataPartsItem;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.MetadataRowsItem;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.OverlaysItem;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.Text;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailBadgeViewModel;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailBadgesItem;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailOverlayBadgeViewModel;
@@ -66,6 +67,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ExtractorHelper {
     private static final String TAG = "ExtractorHelper";
@@ -325,20 +327,16 @@ public class ExtractorHelper {
                             playlist.setTitle(lockupViewModel.getMetadata().getLockupMetadataViewModel().getTitle().getContent());
                             ContentMetadataViewModel contentMetadataViewModel = lockupViewModel.getMetadata().getLockupMetadataViewModel().getMetadata().getContentMetadataViewModel();
 
-                            List<String> desc = new ArrayList<>();
-                            for (MetadataRowsItem metadataRow : contentMetadataViewModel.getMetadataRows()) {
-                                for (MetadataPartsItem metadataPart : metadataRow.getMetadataParts()) {
-                                       desc.add(metadataPart.getText().getContent());
-                                }
-                            }
+                            String description = contentMetadataViewModel.getMetadataRows().stream().map(MetadataRowsItem::getMetadataParts).filter(Objects::nonNull)
+                                            .flatMap(Collection::stream).map(MetadataPartsItem::getText).map(Text::getContent).collect(Collectors.joining(contentMetadataViewModel.getDelimiter()));
 
-                            playlist.setDescription(String.join(contentMetadataViewModel.getDelimiter(), desc));
+                            playlist.setDescription(description);
                             playlist.setPlaylistId(lockupViewModel.getContentId());
                             ThumbnailViewModel thumbnailViewModel = lockupViewModel.getContentImage().getCollectionThumbnailViewModel().getPrimaryThumbnail().getThumbnailViewModel();
 
                             Optional<String> badgeText = thumbnailViewModel.getOverlays().stream().map(OverlaysItem::getThumbnailOverlayBadgeViewModel).map(ThumbnailOverlayBadgeViewModel::getThumbnailBadges)
                                     .filter(Objects::nonNull).flatMap(Collection::stream).map(ThumbnailBadgesItem::getThumbnailBadgeViewModel).map(ThumbnailBadgeViewModel::getText).findFirst();
-                            playlist.setVideoCount(badgeText.map(s -> s.split(" ")[0]).orElse(""));
+                            playlist.setVideoCount(badgeText.orElse(""));
                             List<ThumbnailsItem> thumbnails = thumbnailViewModel.getImage().getSources();
                             String url1 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(0).getUrl();
                             String url2 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.size() > 1 ? thumbnails.get(1).getUrl() : url1;
