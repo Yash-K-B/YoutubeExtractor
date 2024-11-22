@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlin.streams.toList
 
 class ChannelTestActivity : AppCompatActivity() {
     lateinit var kotlinTestBinding: ActivityKotlinTestBinding
@@ -36,8 +37,8 @@ class ChannelTestActivity : AppCompatActivity() {
                 var response = "";
                 channelPlaylists.playlistsByCategory.entries.forEach { entry ->
                     response = response + entry.key + "\n";
-                    response = response + entry.value + "\n";
-                    response += "\n";
+                    response = response + entry.value.stream().map { it.title }.toList() + "\n";
+                    response += "\n\n";
                 }
                 runOnUiThread {
                     kotlinTestBinding.testResult.gravity = GravityCompat.START

@@ -23,6 +23,16 @@ import com.yash.youtube_extractor.pojo.channel.PlaylistItem;
 import com.yash.youtube_extractor.pojo.channel.RunsItem;
 import com.yash.youtube_extractor.pojo.channel.ShelfRenderer;
 import com.yash.youtube_extractor.pojo.channel.Title;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.ContentMetadataViewModel;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.Image;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.LockupViewModel;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.MetadataPartsItem;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.MetadataRowsItem;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.OverlaysItem;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailBadgeViewModel;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailBadgesItem;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailOverlayBadgeViewModel;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailViewModel;
 import com.yash.youtube_extractor.pojo.common.ThumbnailsItem;
 import com.yash.youtube_extractor.pojo.next.CompactVideoRenderer;
 import com.yash.youtube_extractor.pojo.next.WatchNextContinuationItem;
@@ -47,12 +57,14 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ExtractorHelper {
@@ -294,12 +306,9 @@ public class ExtractorHelper {
                     Title title = shelfRenderer.getTitle();
                     List<YoutubePlaylist> playlists = new ArrayList<>();
                     for (PlaylistItem playlistItem : shelfRenderer.getContent().getHorizontalListRenderer().getItems()) {
-                        CompactStationRenderer compactStationRenderer = playlistItem.getCompactStationRenderer();
                         YoutubePlaylist playlist = new YoutubePlaylist();
-                        if (compactStationRenderer == null) {
+                        if (playlistItem.getGridPlaylistRenderer() != null) {
                             GridPlaylistRenderer gridPlaylistRenderer = playlistItem.getGridPlaylistRenderer();
-                            if (gridPlaylistRenderer == null)
-                                continue;
                             playlist.setTitle(gridPlaylistRenderer.getTitle().getRuns().get(0).getText());
                             playlist.setDescription(gridPlaylistRenderer.getShortBylineText().getRuns().get(0).getText());
                             playlist.setPlaylistId(gridPlaylistRenderer.getPlaylistId());
@@ -311,7 +320,34 @@ public class ExtractorHelper {
                             playlist.setArtUrlMedium(url2);
                             playlist.setArtUrlSmall(url1);
                             playlist.setArtUrlHigh(url3);
-                        } else {
+                        } else if (playlistItem.getLockupViewModel() != null) {
+                            LockupViewModel lockupViewModel = playlistItem.getLockupViewModel();
+                            playlist.setTitle(lockupViewModel.getMetadata().getLockupMetadataViewModel().getTitle().getContent());
+                            ContentMetadataViewModel contentMetadataViewModel = lockupViewModel.getMetadata().getLockupMetadataViewModel().getMetadata().getContentMetadataViewModel();
+
+                            List<String> desc = new ArrayList<>();
+                            for (MetadataRowsItem metadataRow : contentMetadataViewModel.getMetadataRows()) {
+                                for (MetadataPartsItem metadataPart : metadataRow.getMetadataParts()) {
+                                       desc.add(metadataPart.getText().getContent());
+                                }
+                            }
+
+                            playlist.setDescription(String.join(contentMetadataViewModel.getDelimiter(), desc));
+                            playlist.setPlaylistId(lockupViewModel.getContentId());
+                            ThumbnailViewModel thumbnailViewModel = lockupViewModel.getContentImage().getCollectionThumbnailViewModel().getPrimaryThumbnail().getThumbnailViewModel();
+
+                            Optional<String> badgeText = thumbnailViewModel.getOverlays().stream().map(OverlaysItem::getThumbnailOverlayBadgeViewModel).map(ThumbnailOverlayBadgeViewModel::getThumbnailBadges)
+                                    .filter(Objects::nonNull).flatMap(Collection::stream).map(ThumbnailBadgesItem::getThumbnailBadgeViewModel).map(ThumbnailBadgeViewModel::getText).findFirst();
+                            playlist.setVideoCount(badgeText.map(s -> s.split(" ")[0]).orElse(""));
+                            List<ThumbnailsItem> thumbnails = thumbnailViewModel.getImage().getSources();
+                            String url1 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(0).getUrl();
+                            String url2 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.size() > 1 ? thumbnails.get(1).getUrl() : url1;
+                            String url3 = CollectionUtility.isEmpty(thumbnails) ? null : thumbnails.get(thumbnails.size() - 1).getUrl();
+                            playlist.setArtUrlMedium(url2);
+                            playlist.setArtUrlSmall(url1);
+                            playlist.setArtUrlHigh(url3);
+                        } else if (playlistItem.getCompactStationRenderer() != null) {
+                            CompactStationRenderer compactStationRenderer = playlistItem.getCompactStationRenderer();
                             playlist.setTitle(compactStationRenderer.getTitle().getSimpleText());
                             playlist.setDescription(compactStationRenderer.getDescription().getSimpleText());
                             playlist.setPlaylistId(Objects.isNull(compactStationRenderer.getNavigationEndpoint().getWatchEndpoint()) ? compactStationRenderer.getNavigationEndpoint().getWatchPlaylistEndpoint().getPlaylistId() : compactStationRenderer.getNavigationEndpoint().getWatchEndpoint().getPlaylistId());
@@ -324,7 +360,8 @@ public class ExtractorHelper {
                             playlist.setArtUrlSmall(url1);
                             playlist.setArtUrlHigh(url3);
                         }
-                        playlists.add(playlist);
+                        if (playlist.getPlaylistId() != null)
+                            playlists.add(playlist);
                     }
 
                     if (!CollectionUtility.isEmpty(title.getRuns())) {

@@ -1,7 +1,11 @@
 package com.yash.youtube_extractor.pojo.channel;
 
 import com.squareup.moshi.Json;
+import com.yash.youtube_extractor.pojo.channel.lockup.model.LockupViewModel;
 
+import lombok.Data;
+
+@Data
 public class PlaylistItem {
 
 	@Json(name = "compactStationRenderer")
@@ -10,28 +14,7 @@ public class PlaylistItem {
 	@Json(name = "gridPlaylistRenderer")
 	private GridPlaylistRenderer gridPlaylistRenderer;
 
-	public void setCompactStationRenderer(CompactStationRenderer compactStationRenderer){
-		this.compactStationRenderer = compactStationRenderer;
-	}
+	@Json(name = "lockupViewModel")
+	private LockupViewModel lockupViewModel;
 
-	public CompactStationRenderer getCompactStationRenderer(){
-		return compactStationRenderer;
-	}
-
-	public void setGridPlaylistRenderer(GridPlaylistRenderer gridPlaylistRenderer){
-		this.gridPlaylistRenderer = gridPlaylistRenderer;
-	}
-
-	public GridPlaylistRenderer getGridPlaylistRenderer(){
-		return gridPlaylistRenderer;
-	}
-
-	@Override
- 	public String toString(){
-		return 
-			"ItemsItem{" + 
-			"compactStationRenderer = '" + compactStationRenderer + '\'' + 
-			",gridPlaylistRenderer = '" + gridPlaylistRenderer + '\'' + 
-			"}";
-		}
 }
