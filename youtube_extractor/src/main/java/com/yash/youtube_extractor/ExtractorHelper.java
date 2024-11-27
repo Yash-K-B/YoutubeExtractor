@@ -36,6 +36,8 @@ import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailOverlayBadg
 import com.yash.youtube_extractor.pojo.channel.lockup.model.ThumbnailViewModel;
 import com.yash.youtube_extractor.pojo.common.ThumbnailsItem;
 import com.yash.youtube_extractor.pojo.next.CompactVideoRenderer;
+import com.yash.youtube_extractor.pojo.next.ContinuationItem;
+import com.yash.youtube_extractor.pojo.next.NextContinuationData;
 import com.yash.youtube_extractor.pojo.next.WatchNextContinuationItem;
 import com.yash.youtube_extractor.pojo.playlist.ContinuationCommand;
 import com.yash.youtube_extractor.pojo.playlist.ContinuationItemRenderer;
@@ -441,6 +443,15 @@ public class ExtractorHelper {
 
                 } else if (item.getContinuationItemRenderer() != null) {
                     continuationCommand = item.getContinuationItemRenderer().getContinuationEndpoint().getContinuationCommand();
+                }
+            }
+
+            if (continuationCommand.getToken() == null) {
+                JSONArray continuations = response.getJSONArray("continuations");
+                JsonAdapter<List<ContinuationItem>> continuationAdapter = moshiKotlin.adapter(Types.newParameterizedType(List.class, ContinuationItem.class));
+                List<ContinuationItem> continuationItems = continuationAdapter.fromJson(continuations.toString());
+                if (!CollectionUtility.isEmpty(continuationItems)) {
+                    continuationCommand.setToken(continuationItems.stream().map(ContinuationItem::getNextContinuationData).filter(Objects::nonNull).map(NextContinuationData::getContinuation).filter(Objects::nonNull).findFirst().orElse(null));
                 }
             }
 

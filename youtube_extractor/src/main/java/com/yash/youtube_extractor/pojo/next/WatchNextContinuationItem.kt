@@ -930,3 +930,24 @@ data class CreatePlaylistServiceEndpoint(
 	@Json(name="videoIds")
 	val videoIds: List<String?>? = null
 )
+
+@JsonClass(generateAdapter = true)
+data class ContinuationItem(
+
+	@Json(name = "nextContinuationData")
+	val nextContinuationData: NextContinuationData? = null
+
+)
+
+@JsonClass(generateAdapter = true)
+data class NextContinuationData(
+
+	val continuation: String? = null,
+
+	val clickTrackingParams: String? = null,
+
+	val label: Text
+
+)
+
+

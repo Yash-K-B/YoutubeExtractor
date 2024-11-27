@@ -19,7 +19,7 @@ class KotlinTestActivity : AppCompatActivity() {
         kotlinTestBinding = ActivityKotlinTestBinding.inflate(layoutInflater)
         setContentView(kotlinTestBinding.root)
 
-        kotlinTestBinding.videoId.editText?.text?.append("Hm80HTT25k8")
+        kotlinTestBinding.videoId.editText?.text?.append("FGNc3BibU3o")
 
         kotlinTestBinding.testKotlin.setOnClickListener(View.OnClickListener {
 
