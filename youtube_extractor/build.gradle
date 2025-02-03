@@ -1,5 +1,7 @@
 plugins {
     id 'com.android.library'
+    id 'org.jetbrains.kotlin.plugin.lombok' version '2.1.10'
+    id 'io.freefair.lombok' version '8.10'
 }
 apply plugin: 'kotlin-android'
 

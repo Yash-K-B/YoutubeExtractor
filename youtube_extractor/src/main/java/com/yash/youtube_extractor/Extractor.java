@@ -122,7 +122,7 @@ public class Extractor {
              */
 
             if (index != -1) {
-                Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\(a\\)\\{a=a.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
+                Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\([A-Za-z0-9]+\\)\\{[A-Za-z0-9]+=[A-Za-z0-9]+.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
                 Matcher m = decoderFunc.matcher(playerJs);
                 String auxFuncName = "";
                 if (m.find()) {
@@ -153,12 +153,23 @@ public class Extractor {
                 Log.d("YOUTUBE_EXTRACTOR", "Throttle function name found in : " + ConverterUtil.formatDuration(end - intermediate));
 
 
-                String initKey = String.format("%s=function(a){", throttleDecoderFunctionName);
+                String initKey = String.format("%s=function(%s){", throttleDecoderFunctionName, throttleMatcher.group(2));
                 String throttleDecoderFunction = JsonUtil.extractJsFunctionFromHtmlJs(initKey, playerJs, ResponseFrom.END);
-                String func = "var " + throttleDecoderFunctionName + "=function(a)" + throttleDecoderFunction + ";";
+                String func = "var " + throttleDecoderFunctionName + "=function(" + throttleMatcher.group(2) + ")" + throttleDecoderFunction + ";";
                 Log.d(TAG, "f = " + func);
-                functions.append(func);
                 throttleFunctionAvailable = true;
+
+                Pattern externalDependency = Pattern.compile("if\\(typeof ([A-Za-z0-9$]+)===\"undefined\"");
+                Matcher externalDependencyMatcher = externalDependency.matcher(throttleDecoderFunction);
+                if (externalDependencyMatcher.find()) {
+                    String externalDependentVariable = externalDependencyMatcher.group(1);
+                    Matcher extraCode = Pattern.compile("var " + externalDependentVariable + "=[^;]+").matcher(playerJs);
+                    if (extraCode.find()) {
+                        Log.d(TAG, "Extra code: " + extraCode.group(0));
+                        functions.append(extraCode.group(0)+";");
+                    }
+                }
+                functions.append(func);
             }
 
             intermediate = end;
@@ -209,7 +220,7 @@ public class Extractor {
     public void extract(String videoId, Callback callback) {
         executorService.execute(() -> {
             try {
-                VideoDetails videoDetails = extractV2(videoId);
+                VideoDetails videoDetails = extract(videoId);
                 handler.post(() -> callback.onSuccess(videoDetails));
 
             } catch (ExtractionException e) {

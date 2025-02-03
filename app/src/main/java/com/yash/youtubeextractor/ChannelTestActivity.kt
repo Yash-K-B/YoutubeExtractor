@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.view.GravityCompat
 import com.yash.youtube_extractor.ExtractorHelper
+import com.yash.youtube_extractor.service.ChannelExtractor
 import com.yash.youtubeextractor.databinding.ActivityKotlinTestBinding
 import com.yash.youtubeextractor.databinding.ActivityKotlinTestV2Binding
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,7 @@ class ChannelTestActivity : AppCompatActivity() {
                     }
                 }
                 val channelPlaylists =
-                    ExtractorHelper.channelInfo(kotlinTestBinding.videoId.editText?.text.toString())
+                    ChannelExtractor.channelInfoV2(kotlinTestBinding.videoId.editText?.text.toString())
 
                 runOnUiThread {
                     kotlinTestBinding.content.setContent {

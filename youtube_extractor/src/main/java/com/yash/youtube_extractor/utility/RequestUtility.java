@@ -81,6 +81,7 @@ public class RequestUtility {
         context.put("playbackContext", Map.of("contentPlaybackContext", Map.of("html5Preference", "HTML5_PREF_WANTS")));
         context.put("contentCheckOk", true);
         context.put("racyCheckOk", true);
+        context.put("X-Goog-Visitor-Id", getVisitorData());
 
         return new JSONObject(context);
     }

@@ -42,7 +42,7 @@ public class CommonUtility {
         try {
         JSONObject clientContext = RequestUtility.buildClientContext();
         clientContext.put("videoId", videoId);
-        return new JSONObject(HttpUtility.getInstance().post(RequestUtility.YOUTUBE_DATA_API, clientContext.toString(), Headers.of("Content-Type","application/json")));
+        return new JSONObject(HttpUtility.getInstance().post(RequestUtility.YOUTUBE_DATA_API, clientContext.toString(), Headers.of("Content-Type","application/json", "X-Goog-Visitor-Id", clientContext.getString("X-Goog-Visitor-Id"))));
         } catch (IOException e) {
             Log.e(TAG, "Failed to get youtube data: ", e);
             return null;
