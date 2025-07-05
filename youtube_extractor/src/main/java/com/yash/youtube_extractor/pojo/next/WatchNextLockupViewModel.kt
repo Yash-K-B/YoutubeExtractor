@@ -3,6 +3,7 @@ package com.yash.youtube_extractor.pojo.next
 import com.squareup.moshi.Json
 import com.yash.youtube_extractor.models.YoutubeSong
 import com.yash.youtube_extractor.utility.CommonUtility
+import com.yash.youtube_extractor.utility.MapUtility
 
 data class MetadataRowsItem(
 
@@ -183,13 +184,13 @@ data class WatchNextLockupViewModel(
 		val videoTitle = this.metadata?.lockupMetadataViewModel?.title?.content ?: "Unknown";
 		song.setTitle(videoTitle);
 
-		val contentMetadataViewModel = this.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel
-		var metadataRows = listOf<String?>()
+		var metadataRows = listOf<List<String?>>()
+		val contentMetadataViewModel = this.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel;
         if (contentMetadataViewModel != null) {
-           metadataRows = contentMetadataViewModel.metadataRows?.map { it?.metadataParts?.map { part -> part?.text }?.joinToString(contentMetadataViewModel.delimiter ?: ",") }.orEmpty()
+           metadataRows = contentMetadataViewModel.metadataRows?.map { it?.metadataParts?.map { part -> part?.text?.content } }?.filterNotNull().orEmpty()
         }
 
-		song.setChannelTitle(metadataRows[0]);
+		song.setChannelTitle(MapUtility.safeGet(metadataRows, 0, 0) as String);
 		song.setDurationMillis(CommonUtility.stringToMillis(
 			this.contentImage?.thumbnailViewModel?.overlays?.filter { it?.thumbnailOverlayBadgeViewModel != null }?.first()
 				?.thumbnailOverlayBadgeViewModel?.thumbnailBadges?.first()?.thumbnailBadgeViewModel?.text
@@ -201,7 +202,7 @@ data class WatchNextLockupViewModel(
 		song.setArtUrlMedium(url2);
 		song.setArtUrlSmall(url1);
 		song.setArtUrlHigh(url3);
-		song.setView(if (metadataRows.size > 1) metadataRows[1] else "");
+		song.setView(MapUtility.safeGet(metadataRows, 1, 0) as String);
 		return song
 	}
 }
