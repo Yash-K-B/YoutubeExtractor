@@ -25,7 +25,7 @@ data class LockupMetadataViewModel(
 	val metadata: Metadata? = null,
 
 	@Json(name="title")
-	val title: Title? = null
+	val title: WNTitle? = null
 )
 
 data class ThumbnailBadgesItem(
@@ -160,7 +160,7 @@ data class ThumbnailViewModel(
 data class MetadataPartsItem(
 
 	@Json(name="text")
-	val text: Text? = null
+	val text: WNText? = null
 )
 
 data class WatchNextLockupViewModel(
@@ -239,7 +239,7 @@ data class Height(
 	val value: Int? = null
 )
 
-data class Text(
+data class WNText(
 
 	@Json(name="styleRuns")
 	val styleRuns: List<StyleRunsItem?>? = null,
@@ -260,7 +260,7 @@ data class Metadata(
 	val contentMetadataViewModel: ContentMetadataViewModel? = null
 )
 
-data class Title(
+data class WNTitle(
 
 	@Json(name="content")
 	val content: String? = null
