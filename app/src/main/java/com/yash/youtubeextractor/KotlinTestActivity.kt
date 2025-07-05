@@ -54,7 +54,9 @@ class KotlinTestActivity : AppCompatActivity() {
 
             runOnUiThread {
                 kotlinTestBinding.content.setContent {
-                    Text("Fetching Details")
+                    Box(modifier = Modifier.padding(horizontal = 10.dp)) {
+                        Text("Fetching Details")
+                    }
                 }
             }
 

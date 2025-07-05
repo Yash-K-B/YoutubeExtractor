@@ -58,7 +58,7 @@ data class LayoutProperties(
 data class ContentMetadataViewModel(
 
 	@Json(name="delimiter")
-	val delimiter: CharSequence? = null,
+	val delimiter: String? = null,
 
 	@Json(name="metadataRows")
 	val metadataRows: List<MetadataRowsItem?>? = null
