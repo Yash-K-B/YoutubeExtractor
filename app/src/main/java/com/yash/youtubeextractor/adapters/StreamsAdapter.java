@@ -103,9 +103,10 @@ public class StreamsAdapter extends RecyclerView.Adapter<StreamsAdapter.StreamVi
                     binding.fileSize.setText(ConverterUtil.convertToHighest(myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getContentLength()));
                     itemView.setOnClickListener(v -> {
                         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
-                        ClipData copyData = ClipData.newPlainText("Url", myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl());
+                        String url = myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl();
+                        ClipData copyData = ClipData.newPlainText("Url", url);
                         clipboardManager.setPrimaryClip(copyData);
-                        LogHelper.d(TAG, "bind: %s", myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl());
+                        LogHelper.d(TAG, "Copied: %s", url);
                         Toast.makeText(context, "Url Copied", Toast.LENGTH_SHORT).show();
                     });
                     //LogHelper.d(TAG, "bind: Video Url :" + myData.getVideoStreams().get(position - (myData.getMuxedStreams().size() + myData.getAudioStreams().size())).getUrl());

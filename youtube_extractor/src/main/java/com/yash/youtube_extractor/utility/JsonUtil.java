@@ -6,6 +6,8 @@ import com.yash.youtube_extractor.constants.ResponseFrom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JsonUtil {
     private static final String TAG = "JsonUtil";
@@ -100,12 +102,16 @@ public class JsonUtil {
     }
 
     public static String extractJsFunctionFromHtmlJs(String initial, String html, ResponseFrom responseFrom) {
+        return extractJsFunctionImpl(initial, null, html, responseFrom);
+    }
+
+    public static String extractJsFunctionImpl(String initial, Character anchorChar, String html, ResponseFrom responseFrom) {
         int stIndex = html.indexOf(initial);
         StringBuilder builder = new StringBuilder();
 //        StringBuilder regExBuilder = new StringBuilder();
         if (stIndex == -1) return builder.toString();
         char ch, preCh, preCh2;
-        char startChar = responseFrom == ResponseFrom.START ? initial.charAt(0) : initial.charAt(initial.length() - 1);
+        char startChar = anchorChar == null ? (responseFrom == ResponseFrom.START ? initial.charAt(0) : initial.charAt(initial.length() - 1)) : anchorChar;
         Character endCharacter = endCharacterMap.get(startChar);
         char endChar = endCharacter == null ? startChar : endCharacter;
         int counter = 0;
@@ -195,5 +201,16 @@ public class JsonUtil {
             }
         }
         return builder.toString();
+    }
+
+
+    public static String extractWithRegex(String regex, String text) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        if(matcher.find()) {
+            return matcher.group(0);
+        } else {
+            return "";
+        }
     }
 }

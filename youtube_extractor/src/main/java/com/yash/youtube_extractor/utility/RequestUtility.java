@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class RequestUtility {
         client.put("osVersion", "10_15_7");
         client.put("browserVersion", "87.0.4280.88");
         client.put("browserName", "Chrome");
-        client.put("userAgent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36,gzip(gfe)");
+        client.put("userAgent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/137.0.0.0 Mobile/15E148 Safari/604.1");
         client.put("screenDensityFloat", "1");
         Map<String, Map<String, String>> context = new HashMap<>();
         context.put("request", new HashMap<>());
@@ -145,5 +146,13 @@ public class RequestUtility {
         preferences.put(LANGUAGE_KEY, sharedPreferences.getString(LANGUAGE_KEY, DEFAULT_LANGUAGE));
         preferences.put(CLIENT_API_KEY, sharedPreferences.getString(CLIENT_API_KEY, DEFAULT_API_KEY));
         preferences.put(CLIENT_VERSION_KEY, sharedPreferences.getString(CLIENT_VERSION_KEY, DEFAULT_VERSION));
+    }
+
+    public static void initializeMetadata(String html) throws JSONException {
+        String apiInfo = JsonUtil.extractJsonFromHtml("\"INNERTUBE_API_KEY\"", html);
+        JSONObject apiInfoJson = new JSONObject(String.format("{\"INNERTUBE_API_KEY%s}", apiInfo));
+        preferences.put(CLIENT_API_KEY, apiInfoJson.getString("INNERTUBE_API_KEY"));
+        preferences.put(CLIENT_VERSION_KEY, apiInfoJson.getString("INNERTUBE_CLIENT_VERSION"));
+        preferences.put(VISITOR_DATA_KEY, apiInfoJson.getJSONObject("INNERTUBE_CONTEXT").getJSONObject("client").getString("visitorData"));
     }
 }

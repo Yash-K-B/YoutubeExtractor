@@ -21,7 +21,8 @@ public class YoutubeExtractor extends Application {
         super.onCreate();
         LogHelper.deploy(this,"YoutubeExtractor");
 
-        HttpUtility.initialise(new Cache(getCacheDir(), 41_943_040), new CacheControl.Builder().maxAge(2, TimeUnit.DAYS).maxStale(2, TimeUnit.DAYS).build());
+//        HttpUtility.initialise(new Cache(getCacheDir(), 41_943_040), new CacheControl.Builder().maxAge(4, TimeUnit.HOURS).maxStale(4, TimeUnit.HOURS).build());
+        HttpUtility.initialise(new Cache(getCacheDir(), 41_943_040), null);
         RequestUtility.updateSettings(PreferenceManager.getDefaultSharedPreferences(this));
         registerReceiver(new ConnectivityReceiver(), new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }

@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void refresh(String url) {
-        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=TVbI55pDdaI" : url);
+        mainBinding.link.setText(url == null ? "https://www.youtube.com/watch?v=se9DDAwwGQY" : url);
         mainBinding.container.setLayoutManager(new LinearLayoutManager(this));
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }

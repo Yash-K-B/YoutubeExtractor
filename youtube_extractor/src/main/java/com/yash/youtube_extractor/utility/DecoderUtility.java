@@ -39,7 +39,7 @@ public class DecoderUtility {
     }
 
     public static String decodeThrottle(String url, Decoder decoder) {
-        if (decoder == null) return url;
+        if (decoder == null || url == null) return url;
         Log.i(TAG, "decodeThrottle: Before : "+ url);
         Uri uri = Uri.parse(url);
         String parameter = Uri.decode(uri.getQueryParameter("n"));

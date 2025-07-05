@@ -9,6 +9,10 @@ import android.util.Log;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.yash.youtube_extractor.constants.ResponseFrom;
+import com.yash.youtube_extractor.decoders.YParser;
+import com.yash.youtube_extractor.decoders.YParser.YParseResponse;
+import com.yash.youtube_extractor.decoders.impl.FunctionNameHiddenParser;
+import com.yash.youtube_extractor.decoders.impl.NormalParser;
 import com.yash.youtube_extractor.exceptions.ExtractionException;
 import com.yash.youtube_extractor.models.ChannelThumbnail;
 import com.yash.youtube_extractor.models.Decoder;
@@ -20,6 +24,7 @@ import com.yash.youtube_extractor.utility.ConverterUtil;
 import com.yash.youtube_extractor.utility.HttpUtility;
 import com.yash.youtube_extractor.utility.JsonUtil;
 import com.yash.youtube_extractor.utility.RegExUtility;
+import com.yash.youtube_extractor.utility.RequestUtility;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
@@ -121,70 +126,34 @@ public class Extractor {
              * Axillary function = var " + auxFuncName + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};
              */
 
+            YParseResponse response = YParseResponse.empty();
             if (index != -1) {
-                Pattern decoderFunc = Pattern.compile("([A-za-z0-9_$]{2,3})=function\\([A-Za-z0-9]+\\)\\{[A-Za-z0-9]+=[A-Za-z0-9]+.split\\(\"\"\\);([A-za-z0-9_$]+)\\..*\\}");//"=([A-za-z0-9_]+)\\(decodeURIComponent\\([.\\w]+\\)\\)");
-                Matcher m = decoderFunc.matcher(playerJs);
-                String auxFuncName = "";
-                if (m.find()) {
-                    functions.append("var ").append(m.group(0)).append(";");
-                    decodeFunctionName = m.group(1);
-                    auxFuncName = m.group(2);
+                YParser parser;
+                if (playerJs.contains(";split;")) {
+                    parser = new FunctionNameHiddenParser();
+                } else {
+                    parser = new NormalParser();
                 }
-                Pattern auxFunc = Pattern.compile("var " + (auxFuncName != null ? auxFuncName.replace("$", "\\$") : "") + "\\s*=\\s*\\{(.*\\n*){0,3}\\}\\};");
-                Matcher auxMatcher = auxFunc.matcher(playerJs);
-                if (auxMatcher.find()) {
-                    functions.append(auxMatcher.group(0));
-                }
+                response = parser.parse(playerJs);
             }
-
             intermediate = end;
             end = SystemClock.currentThreadTimeMillis();
-            Log.d("YOUTUBE_EXTRACTOR", "Cipher decoder function found in : " + ConverterUtil.formatDuration(end - intermediate));
+            Log.d("YOUTUBE_EXTRACTOR", "Cipher decoder and throttle function found in : " + ConverterUtil.formatDuration(end - intermediate));
 
 
-            Pattern throttleFunc = Pattern.compile(RegExUtility.getNSigRegex());
-            Matcher throttleMatcher = throttleFunc.matcher(playerJs);
-            boolean throttleFunctionAvailable = false;
-            if (throttleMatcher.find()) {
-                throttleDecoderFunctionName = throttleMatcher.group(1);
-
-                intermediate = end;
-                end = SystemClock.currentThreadTimeMillis();
-                Log.d("YOUTUBE_EXTRACTOR", "Throttle function name found in : " + ConverterUtil.formatDuration(end - intermediate));
-
-
-                String initKey = String.format("%s=function(%s){", throttleDecoderFunctionName, throttleMatcher.group(2));
-                String throttleDecoderFunction = JsonUtil.extractJsFunctionFromHtmlJs(initKey, playerJs, ResponseFrom.END);
-                String func = "var " + throttleDecoderFunctionName + "=function(" + throttleMatcher.group(2) + ")" + throttleDecoderFunction + ";";
-                Log.d(TAG, "f = " + func);
-                throttleFunctionAvailable = true;
-
-                Pattern externalDependency = Pattern.compile("if\\(typeof ([A-Za-z0-9$]+)===\"undefined\"");
-                Matcher externalDependencyMatcher = externalDependency.matcher(throttleDecoderFunction);
-                if (externalDependencyMatcher.find()) {
-                    String externalDependentVariable = externalDependencyMatcher.group(1);
-                    Matcher extraCode = Pattern.compile("var " + externalDependentVariable + "=[^;]+").matcher(playerJs);
-                    if (extraCode.find()) {
-                        Log.d(TAG, "Extra code: " + extraCode.group(0));
-                        functions.append(extraCode.group(0)+";");
-                    }
-                }
-                functions.append(func);
-            }
-
-            intermediate = end;
-            end = SystemClock.currentThreadTimeMillis();
-            Log.d("YOUTUBE_EXTRACTOR", "Throttle function found in : " + ConverterUtil.formatDuration(end - intermediate));
+//            intermediate = end;
+//            end = SystemClock.currentThreadTimeMillis();
+//            Log.d("YOUTUBE_EXTRACTOR", "Throttle function found in : " + ConverterUtil.formatDuration(end - intermediate));
 
 
             context.setOptimizationLevel(-1);
-            context.evaluateString(scope, functions.toString(), "script", 1, null);
+            context.evaluateString(scope, response.getScript(), "script", 1, null);
 
 
-            if (index != -1)
-                decoderFunction = (Function) scope.get(decodeFunctionName, scope);
-            if (throttleFunctionAvailable)
-                throttleFunction = (Function) scope.get(throttleDecoderFunctionName, scope);
+            if (response.hasDecoderFunction())
+                decoderFunction = (Function) scope.get(response.getDecoderFunctionName(), scope);
+            if (response.hasThrottleFunction())
+                throttleFunction = (Function) scope.get(response.getThrottleFunctionName(), scope);
             streamingData.initObject(new Decoder() {
                 @Override
                 public String decodeSignature(String signature) {
@@ -220,7 +189,7 @@ public class Extractor {
     public void extract(String videoId, Callback callback) {
         executorService.execute(() -> {
             try {
-                VideoDetails videoDetails = extract(videoId);
+                VideoDetails videoDetails = extractV2(videoId);
                 handler.post(() -> callback.onSuccess(videoDetails));
 
             } catch (ExtractionException e) {
@@ -257,6 +226,8 @@ public class Extractor {
         Log.d("YOUTUBE_EXTRACTOR", "Starting extraction of video id - " + videoId);
         start = SystemClock.currentThreadTimeMillis();
         try {
+            String html = CommonUtility.getHtmlString(BASE_URL + videoId);
+            RequestUtility.initializeMetadata(html);
             JSONObject data = CommonUtility.getData(videoId);
             if(data == null) {
                 throw new ExtractionException("Failed to extract data");

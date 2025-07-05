@@ -1,26 +1,48 @@
 package com.yash.youtubeextractor
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.view.GravityCompat
 import com.yash.logging.LogHelper
 import com.yash.youtube_extractor.Extractor
 import com.yash.youtube_extractor.exceptions.ExtractionException
 import com.yash.youtube_extractor.models.VideoDetails
 import com.yash.youtubeextractor.databinding.ActivityKotlinTestBinding
+import com.yash.youtubeextractor.databinding.ActivityKotlinTestV2Binding
 
 class KotlinTestActivity : AppCompatActivity() {
-    lateinit var kotlinTestBinding: ActivityKotlinTestBinding
+    lateinit var kotlinTestBinding: ActivityKotlinTestV2Binding
+    lateinit var context: Context;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        kotlinTestBinding = ActivityKotlinTestBinding.inflate(layoutInflater)
+        kotlinTestBinding = ActivityKotlinTestV2Binding.inflate(layoutInflater)
+        context = this@KotlinTestActivity
         setContentView(kotlinTestBinding.root)
 
-        kotlinTestBinding.videoId.editText?.text?.append("FGNc3BibU3o")
-
+        kotlinTestBinding.videoId.editText?.text?.append("daY_-Sb_jYo")
         kotlinTestBinding.testKotlin.setOnClickListener(View.OnClickListener {
 
             if(kotlinTestBinding.videoId.editText?.text?.isEmpty()!!){
@@ -30,6 +52,12 @@ class KotlinTestActivity : AppCompatActivity() {
 
             val videoId = kotlinTestBinding.videoId.editText?.text.toString()
 
+            runOnUiThread {
+                kotlinTestBinding.content.setContent {
+                    Text("Fetching Details")
+                }
+            }
+
             val extractor = Extractor();
             extractor.extract(videoId, object : Extractor.Callback {
                 override fun onSuccess(videoDetails: VideoDetails?) {
@@ -38,9 +66,50 @@ class KotlinTestActivity : AppCompatActivity() {
                     val channelThumbnailUrl = videoDetails?.videoData?.channelThumbnail?.thumbnails?.get(0)?.url
                     LogHelper.d("From Kotlin ", " channel Thumbnail : $channelThumbnailUrl")
                     LogHelper.d("From Kotlin: ", videoDetails?.videoData?.toString())
-                    kotlinTestBinding.testResult.gravity = GravityCompat.START
-                    kotlinTestBinding.testResult.text = videoDetails?.videoData?.toString()
-                    Toast.makeText(this@KotlinTestActivity, "Success", Toast.LENGTH_SHORT).show()
+
+                    runOnUiThread {
+                        kotlinTestBinding.content.setContent {
+                            val scrollState = rememberScrollState()
+
+                            Column(
+                                modifier = Modifier
+                                    .verticalScroll(scrollState)
+                                    .padding(horizontal = 10.dp)
+                                    .fillMaxSize()
+                            ) {
+                                Text(videoDetails?.videoData?.toString() ?: "")
+                                Spacer(modifier = Modifier.height(5.dp))
+
+                                Text("Muxed Streams")
+                                videoDetails?.streamingData?.muxedStreamFormats?.forEach {
+                                    Box(Modifier.padding(8.dp).clickable(enabled = true, onClick = { copyToClipboard(it.url) })) {
+                                        Text(text = "Itag: ${it.itag}, Type: ${it.mimeType}")
+                                    }
+                                    HorizontalDivider()
+                                }
+
+                                Text("Video Streams")
+                                videoDetails?.streamingData?.adaptiveVideoFormats?.forEach {
+                                    Box(Modifier.padding(8.dp).clickable(enabled = true, onClick = { copyToClipboard(it.url) })) {
+                                        Text(text = "Itag: ${it.itag}, Type: ${it.mimeType}")
+                                    }
+                                    HorizontalDivider()
+                                }
+
+                                Text("Audio Streams")
+                                videoDetails?.streamingData?.adaptiveAudioFormats?.forEach {
+                                    Box(Modifier.padding(8.dp).clickable(enabled = true, onClick = { copyToClipboard(it.url) })) {
+                                        Text(text = "Itag: ${it.itag}, Type: ${it.mimeType}")
+                                    }
+                                    HorizontalDivider()
+                                }
+                            }
+
+                            Toast.makeText(this@KotlinTestActivity, "Success", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+
                 }
 
                 override fun onError(e: ExtractionException) {
@@ -60,6 +129,12 @@ class KotlinTestActivity : AppCompatActivity() {
 
         })
 
+    }
 
+    private fun copyToClipboard(url: String) {
+        var clipboardManager = this@KotlinTestActivity.context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager;
+        val copyData = ClipData.newPlainText("Url", url);
+        clipboardManager.setPrimaryClip(copyData);
+        Toast.makeText(context, "Url Copied", Toast.LENGTH_SHORT).show();
     }
 }

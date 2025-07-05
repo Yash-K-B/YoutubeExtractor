@@ -1,23 +1,22 @@
 package com.yash.youtube_extractor.models;
 
-import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.squareup.moshi.Json;
 import com.yash.youtube_extractor.utility.DecoderUtility;
+import com.yash.youtube_extractor.utility.UrlUtility;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 public class StreamingData implements Serializable {
+
+    private static final String TAG = "StreamingData";
 
 
     boolean isFormatInitialized = false;
@@ -27,6 +26,9 @@ public class StreamingData implements Serializable {
     private List<Format> formats = new ArrayList<>();
     @Json(name = "adaptiveFormats")
     private List<AdaptiveFormat> adaptiveFormats = new ArrayList<>();
+
+    @Json(name = "serverAbrStreamingUrl")
+    private String serverAbrStreamingUrl;
 
     private List<AdaptiveAudioFormat> adaptiveAudioFormats = new ArrayList<>();
 
@@ -68,6 +70,13 @@ public class StreamingData implements Serializable {
         this.adaptiveVideoFormats = adaptiveVideoFormats;
     }
 
+    public String getServerAbrStreamingUrl() {
+        return serverAbrStreamingUrl;
+    }
+
+    public void setServerAbrStreamingUrl(String serverAbrStreamingUrl) {
+        this.serverAbrStreamingUrl = serverAbrStreamingUrl;
+    }
 
     public static class ColorInfo {
 
@@ -156,10 +165,7 @@ public class StreamingData implements Serializable {
 
     public static class AdaptiveAudioFormat {
 
-        public AdaptiveAudioFormat() {
-        }
-
-        public AdaptiveAudioFormat(AdaptiveFormat format, Decoder decoder) {
+        public AdaptiveAudioFormat(AdaptiveFormat format, Decoder decoder, String serverAbrStreamingUrl) {
             this.itag = format.getItag();
             this.mimeType = format.getMimeType();
             this.bitrate = format.getBitrate();
@@ -176,7 +182,11 @@ public class StreamingData implements Serializable {
             this.audioSampleRate = format.getAudioSampleRate();
             this.audioChannels = format.getAudioChannels();
             this.loudnessDb = format.getLoudnessDb();
-            this.url = DecoderUtility.getUrl(format.getUrl(), format.getSignatureCipher(), decoder);
+            if (StringUtils.isNotBlank(format.getUrl()) || StringUtils.isNotBlank(format.getSignatureCipher())) {
+                this.url = DecoderUtility.getUrl(format.getUrl(), format.getSignatureCipher(), decoder);
+            } else {
+                this.url = DecoderUtility.getUrl(UrlUtility.buildUrl(format, serverAbrStreamingUrl), format.getSignatureCipher(), decoder);;
+            }
         }
 
         @Json(name="itag")
@@ -378,10 +388,7 @@ public class StreamingData implements Serializable {
 
     public static class AdaptiveVideoFormat {
 
-        public AdaptiveVideoFormat() {
-        }
-
-        public AdaptiveVideoFormat(AdaptiveFormat format, Decoder decoder) {
+        public AdaptiveVideoFormat(AdaptiveFormat format, Decoder decoder, String serverAbrStreamingUrl) {
             this.itag = format.getItag();
             this.mimeType = format.getMimeType();
             this.bitrate = format.getBitrate();
@@ -397,7 +404,11 @@ public class StreamingData implements Serializable {
             this.projectionType = format.getProjectionType();
             this.averageBitrate = format.getAverageBitrate();
             this.approxDurationMs = format.getApproxDurationMs();
-            this.url = DecoderUtility.getUrl(format.getUrl(), format.getSignatureCipher(), decoder);
+            if (StringUtils.isNotBlank(format.getUrl()) || StringUtils.isNotBlank(format.getSignatureCipher())) {
+                this.url = DecoderUtility.getUrl(format.getUrl(), format.getSignatureCipher(), decoder);
+            } else {
+                this.url = DecoderUtility.getUrl(UrlUtility.buildUrl(format, serverAbrStreamingUrl), format.getSignatureCipher(), decoder);
+            }
         }
 
         @Json(name="itag")
@@ -591,8 +602,8 @@ public class StreamingData implements Serializable {
         if (isFormatInitialized) return;
         for (int i = 0; i < adaptiveFormats.size(); i++) {
             if (adaptiveFormats.get(i).getHeight() == null)
-                adaptiveAudioFormats.add(new AdaptiveAudioFormat(adaptiveFormats.get(i), decoder));
-            else adaptiveVideoFormats.add(new AdaptiveVideoFormat(adaptiveFormats.get(i), decoder));
+                adaptiveAudioFormats.add(new AdaptiveAudioFormat(adaptiveFormats.get(i), decoder, serverAbrStreamingUrl));
+            else adaptiveVideoFormats.add(new AdaptiveVideoFormat(adaptiveFormats.get(i), decoder, serverAbrStreamingUrl));
         }
         for (int i = 0; i < formats.size(); i++)
             formats.get(i).decoder(decoder);
