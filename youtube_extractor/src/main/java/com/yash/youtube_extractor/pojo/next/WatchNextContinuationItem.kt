@@ -13,7 +13,10 @@ data class WatchNextContinuationItem(
 	val continuationItemRenderer: ContinuationItemRenderer? = null,
 
 	@Json(name="compactVideoRenderer")
-	val compactVideoRenderer: CompactVideoRenderer? = null
+	val compactVideoRenderer: CompactVideoRenderer? = null,
+
+	@Json(name="lockupViewModel")
+	val lockupViewModel: WatchNextLockupViewModel? = null
 )
 
 @JsonClass(generateAdapter = true)

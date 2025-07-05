@@ -24,7 +24,6 @@ import com.yash.youtube_extractor.pojo.channel.RunsItem;
 import com.yash.youtube_extractor.pojo.channel.ShelfRenderer;
 import com.yash.youtube_extractor.pojo.channel.Title;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.ContentMetadataViewModel;
-import com.yash.youtube_extractor.pojo.channel.lockup.model.Image;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.LockupViewModel;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.MetadataPartsItem;
 import com.yash.youtube_extractor.pojo.channel.lockup.model.MetadataRowsItem;
@@ -39,6 +38,7 @@ import com.yash.youtube_extractor.pojo.next.CompactVideoRenderer;
 import com.yash.youtube_extractor.pojo.next.ContinuationItem;
 import com.yash.youtube_extractor.pojo.next.NextContinuationData;
 import com.yash.youtube_extractor.pojo.next.WatchNextContinuationItem;
+import com.yash.youtube_extractor.pojo.next.WatchNextLockupViewModel;
 import com.yash.youtube_extractor.pojo.playlist.ContinuationCommand;
 import com.yash.youtube_extractor.pojo.playlist.ContinuationItemRenderer;
 import com.yash.youtube_extractor.pojo.playlist.PlaylistVideoItem;
@@ -441,6 +441,10 @@ public class ExtractorHelper {
                     youtubeSongs.add(youtubeSong);
 
 
+                } else if (item.getLockupViewModel() != null) {
+                    WatchNextLockupViewModel lockupViewModel = item.getLockupViewModel();
+                    YoutubeSong youtubeSong = lockupViewModel.toYoutubeSong();
+                    youtubeSongs.add(youtubeSong);
                 } else if (item.getContinuationItemRenderer() != null) {
                     continuationCommand = item.getContinuationItemRenderer().getContinuationEndpoint().getContinuationCommand();
                 }
